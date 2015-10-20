@@ -1,0 +1,85 @@
+/* Title */
+.header {
+    box-shadow: 0 3px 3px #BBBBBB;
+    top: 0px;
+    position: fixed;
+    border-color: #252525;
+    background-repeat: repeat-x;
+    width: 100%;
+    z-index: 10000;
+    background-color: white;
+}
+
+@media (max-width: 767px) {
+    .header {
+	position: absolute;
+        height: 105px;
+    }
+}
+
+.header h2 {
+    font-weight: 200;
+}
+
+/* Sidebar */
+.sidebar {
+    box-shadow: 4px 4px 4px #666666;
+    padding: 0;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+    overflow-y: auto;
+    padding-bottom: 10px;
+}
+
+.tab-pane {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* General */
+.clickable {
+    cursor: pointer;
+}
+
+/* Colors */
+.red {
+    color: red;
+}
+.blue {
+    color: blue;
+}
+.green {
+    color: #008000;
+}
+.orange {
+    color: orange;
+}
+.gray {
+    color: gray;
+}
+
+/* pills */
+.pill {
+    border-radius: 4px;
+    color: #FFFFFF;
+    height: 26px;
+ margin-bottom: 2px;
+ padding-left: 10px;
+ padding-right: 10px;
+ padding-top: 5px;
+}
+.donepill {
+    background-image: linear-gradient(to bottom, #62C462, #51A351);
+}
+.runningpill {
+    background-image: linear-gradient(to bottom, #0088CC, #0044CC);
+}
+.errorpill {
+    background-image: linear-gradient(to bottom, #EE5F5B, #BD362F);
+}
+.queuedpill {
+    background-image: linear-gradient(to bottom, #FBB450, #F89406);
+}
+.pendingpill {
+    background-image: linear-gradient(to bottom, #BBBBBB, #666666);
+}
