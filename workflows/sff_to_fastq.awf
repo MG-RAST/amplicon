@@ -1,0 +1,72 @@
+{
+    "info": {
+        "pipeline": "inbox_sff_to_fastq",
+        "name": "[% job_name %]",
+        "user": "[% user_id %]",
+        "clientgroups":"[% clientgroups %]",
+        "userattr": {
+            "type": "inbox",
+            "id": "[% user_id %]",
+            "user": "[% user_name %]",
+            "email": "[% user_email %]"
+        }
+    },
+    "shockhost": "[% shock_url %]",
+    "tasks": [
+        {
+            "cmd": {
+                "args": "",
+                "description": "",
+                "name": "",
+                "environ" : { }
+            },
+            "dependsOn": [],
+            "inputs": {
+                "[% sff_file %]": {
+                    "host": "[% shock_url %]",
+                    "node": "[% sff_file_id %]"
+                }
+            },
+            "outputs": {
+                "[% fastq_file %]": {
+                    "host": "[% shock_url %]",
+                    "node": "-",
+                    "attrfile": "userattr.json"
+                }
+            },
+            "userattr": {
+                "parent_seq_file": "[% sff_file_id %]"
+            },
+            "taskid": "0",
+            "totalwork": 1
+        },
+        {
+            "cmd": {
+                "args": "",
+                "description": "",
+                "name": "",
+                "environ" : {}
+            },
+	    "app": {
+		"name": "amplicon/inbox.sffToFastQ.default",
+		"app_args": [
+                    {
+                        "resource": "shock",
+                        "filename": "[% seq_file %]",
+                        "node": "[% seq_file_id %]",
+                        "host": "[% shock_url %]"
+                    },
+                    {
+                        "resource": "string",
+                        "value": "[% file_type %]"
+                    }
+                ]
+	    },
+            "dependsOn": ["0"],
+            "inputs": [],
+            "outputs": [],
+            "taskid": "1",
+            "totalwork": 1
+        }
+    ]
+}
