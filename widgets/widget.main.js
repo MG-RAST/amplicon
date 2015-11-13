@@ -40,9 +40,6 @@
 
 	sidebar.innerHTML = sidehtml;
 
-	// check if actions are running
-	widget.getRunningInboxActions();
-
 	// title
 	var html = "";
 
@@ -111,7 +108,7 @@
 	    widget.checkScreenWidth();
 	    window.onresize = Retina.WidgetInstances.main[1].checkScreenWidth;
 
-	    //Retina.WidgetInstances.login[1].verifyAuthentication(RetinaConfig.mgrast_api+"/user/authenticate", stm.authHeader);
+	    widget.AWEJoblist();
 
 	} else {
 	    content.innerHTML = "<div class='alert alert-info' style='width: 500px;'>You must be logged in to upload data.</div>";
@@ -278,57 +275,17 @@
 	    filetype = "archive";
 	} else if (fn.match(/(gz|gzip)$/)) {
 	    filetype = "compressed";
-	} else if (fn.match(/(fasta|fa|ffn|frn|fna|fas)$/)) {
-	    sequenceType = "fasta";
-	    filetype = "sequence";
 	} else if (fn.match(/sff$/)) {
 	    sequenceType = "sff";
 	    filetype = "sff sequence";
 	} else if (fn.match(/(fq|fastq)$/)) {
 	    sequenceType = "fastq";
 	    filetype = "sequence";
-	} else if (fn.match(/(xls|xlsx)$/)) {
-	    filetype = "excel";
-	} else if (fn.match(/json$/)) {
-	    filetype = "JSON";
 	} else if (fn.match(/txt|barcode$/)) {
 	    filetype = "text";
 	}
 	
 	return { fileType: filetype, sequenceType: sequenceType };
-    };
-
-    widget.metadataValidationResult = function (data, nodeid) {
-	var widget = this;
-
-	var resultDiv = document.getElementById('metadataValidation');
-	if (resultDiv) {
-	    if (data.is_valid) {
-		resultDiv.innerHTML = '<div class="alert alert-success">This file contains valid metadata.</div>';
-	    } else {
-		var txt = data.message.replace(/\[error\]/, "");
-		var messages = (data.hasOwnProperty('errors') && data.errors.length) ? "<br>"+data.errors.join("<br>") : "";
-//		jQuery.ajax(RetinaConfig['mgrast_api']+"/metadata/google/"+nodeid, {
-			// success: function(data){
-			//     var resultDiv = document.getElementById('metadataValidation');
-			//     if (resultDiv) {
-			// 	resultDiv.innerHTML = '<div class="alert alert-error"><b>This is not valid metadata</b><br>'+txt+messages+'</div><div style="text-align: center;"><button class="btn btn-primary" onclick="window.open(\'https://docs.google.com/spreadsheets/d/1lpLH6mStkgm81cTM5UoDrJpsLQoj9Camy0xMGyVB5bQ/edit?usp=sharing&newcopy=true\');">edit in google sheets</button></div>';
-			//     }
-			// },
-			// error: function(jqXHR, error){
-			//     var resultDiv = document.getElementById('metadataValidation');
-			//     if (resultDiv) {
-				resultDiv.innerHTML = '<div class="alert alert-error"><b>This is not valid metadata</b><br>'+txt+messages+'</div>';
-		    // 	    }
-		    // 	    console.log(error);
-		    // 	    console.log(jqXHR);
-		    // 	},
-		    // 	crossDomain: true,
-		    // 	headers: stm.authHeader,
-		    // 	type: "GET"
-		    // });
-	    }
-	}
     };
 
     widget.filePreview = function (params) {
@@ -359,7 +316,7 @@
 	// check data
 	var data = params.data;
 
-	var task = widget.checkFileHasAction(fn);
+	var task = null;
 	if (task) {
 	    html += '<div class="alert alert-info" style="margin-top: 20px;">This file is being processed with '+task+'</div>';
 	} else {
@@ -528,18 +485,8 @@
 
 		    html += "</div>";
 		} else {
-		    if (! widget.checkFileHasAction(node.file.name)) {
-			var url = RetinaConfig.mgrast_api + "/inbox/stats/"+node.id;
-			jQuery.ajax(url, {
-			    success: function(data){
-				Retina.WidgetInstances.main[1].getRunningInboxActions();
-			    },
-			    error: function(jqXHR, error){ },
-			    crossDomain: true,
-			    headers: stm.authHeader,
-			    type: "GET"
-			});
-		    }
+		    widget.statsCalculation(node);
+		    
 		    html += "</h5><div class='alert alert-info'>calculation of sequence stats in progress <button class='btn btn-small' title='refresh' style='margin-left: 15px;' onclick='Retina.WidgetInstances.main[1].browser.updateData();'><img src='Retina/images/loop.png' style='width: 12px; margin-top: -2px;'></button></div>";
 		}
 	    }
@@ -578,7 +525,10 @@
 	    
 	    // calculate sequence stats
 	    if (widget.detectFiletype(node.file.name).fileType == "sequence") {
-		widget.statsCalculation(node.id);
+		widget.statsCalculation(node);
+	    }
+	    else if (widget.detectFiletype(node.file.name).fileType == "sff sequence") {
+		widget.sff2fastq(node);
 	    }
 	    // validate metadata
 	    else if (widget.detectFiletype(node.file.name).fileType == "excel") {
@@ -618,74 +568,28 @@
     // Inbox actions
     widget.statsCalculation = function (node) {
 	var widget = this;
-
-	var url = RetinaConfig.mgrast_api + "/inbox/stats/"+node;
-	jQuery.ajax(url, {
-	    success: function(data){
-		var widget = Retina.WidgetInstances.main[1];
-		widget.getRunningInboxActions();
-		widget.browser.preserveDetail = true;
-		widget.browser.updateData();
-	    },
-	    error: function(jqXHR, error){
-		alert("sequence stats calculation failed");
-	    },
-	    crossDomain: true,
-	    headers: stm.authHeader,
-	    type: "GET"
-	});
+	widget.AWESubmission({ "variables": { "seq_file_id": node.id,
+					      "seq_file": node.file.name,
+					      "file_type": "fastq" },
+			       "workflow": "seq_stats" });
     };
 
-    widget.sff2fastq = function (fid) {
-	var widget = Retina.WidgetInstances.main[1];
-	document.getElementById('convert').innerHTML = "<img src='Retina/images/waiting.gif' style='width: 32px;'>";
-
-	var url = RetinaConfig.mgrast_api+'/inbox/sff2fastq';
-	jQuery.ajax(url, {
-	    data: { "sff_file": fid },
-	    success: function(data){
-		Retina.WidgetInstances.main[1].getRunningInboxActions();
-		document.getElementById('convert').innerHTML = '<div class="alert alert-info" style="margin-top: 20px;">This file is being processed with sff to fastq</div>';
-	    },
-	    error: function(jqXHR, error){
-		console.log(error);
-		console.log(jqXHR);
-		document.getElementById('convert').innerHTML = '<div class="alert alert-info" style="margin-top: 20px;">sff to fastq processing failed</div>';
-	    },
-	    crossDomain: true,
-	    headers: stm.authHeader,
-	    type: "POST"
-	});
+    widget.sff2fastq = function (node) {
+	var widget = this;
+	widget.AWESubmission({ "variables": { "sff_file_id": node.id,
+					      "sff_file": node.file.name,
+					      "fastq_file": node.file.name.replace(/sff$/, "fastq") },
+			       "workflow": "sff_to_fastq" });
     };
 
     widget.demultiplex = function (barcodeID) {
-	var widget = Retina.WidgetInstances.main[1];
-
-	var url = RetinaConfig.mgrast_api+'/inbox/demultiplex';
-	var d = { "seq_file": document.getElementById('demultiplexFile').options[document.getElementById('demultiplexFile').selectedIndex].value,
-		  "barcode_file": barcodeID,
-		  "rc_index": document.getElementById('demultiplexIsReverseComplement').checked };
-	var ind = document.getElementById('demultiplexIndex');
-	if (ind.selectedIndex > 0) {
-	    d.index_file = ind.options[ind.selectedIndex].value;
-	}
-	jQuery.ajax(url, {
-	    data: d,
-	    success: function(data){
-		document.getElementById('convert').innerHTML = '<div class="alert alert-info" style="margin-top: 20px;">This file is being processed with demultiplex</div>';
-		Retina.WidgetInstances.main[1].getRunningInboxActions();
-	    },
-	    error: function(jqXHR, error){
-		document.getElementById('convert').innerHTML = '<div class="alert alert-error" style="margin-top: 20px;">demultiplex failed</div>';
-		console.log(error);
-		console.log(jqXHR);
-	    },
-	    crossDomain: true,
-	    headers: stm.authHeader,
-	    type: "POST"
-	});
-
-	document.getElementById('convert').innerHTML = "<img src='Retina/images/waiting.gif' style='width: 32px;'>";
+	var widget = this;
+	widget.AWESubmission({ "variables": { "seq_file": seq.file.name,
+					      "seq_file_id": seq.id,
+					      "bar_file": bar.file.name,
+					      "bar_file_id": bar.id,
+					      "file_type": seq.attributes.stats_info.file_type },
+			       "workflow": "demultiplex" });
     };
 
     widget.joinPairedEnds = function () {
@@ -742,105 +646,6 @@
 	document.getElementById('joinPairedEndsDiv').innerHTML = "<img src='Retina/images/waiting.gif' style='width: 32px;'>";
     };
 
-    widget.getRunningInboxActions = function () {
-	var widget = Retina.WidgetInstances.main[1];
-	
-	var url = RetinaConfig.awe_url+'/inbox/pending?in-progress=1&suspend=1&pending=1&queued=1';
-	jQuery.ajax(url, {
-	    success: function(data){
-		Retina.WidgetInstances.main[1].inboxData = data.data;
-		Retina.WidgetInstances.main[1].showRunningInboxActions();
-	    },
-	    error: function(jqXHR, error){
-		console.log(error);
-		console.log(jqXHR);
-		Retina.WidgetInstances.main[1].showRunningInboxActions();
-	    },
-	    crossDomain: true,
-	    headers: stm.authHeader,
-	    type: "GET",
-	});
-
-    };
-
-    widget.cancelInboxAction = function (id) {
-	var widget = Retina.WidgetInstances.main[1];
-	
-	var url = RetinaConfig.mgrast_api+'/inbox/cancel/'+id;
-	jQuery.ajax(url, {
-	    success: function(data){
-		Retina.WidgetInstances.main[1].getRunningInboxActions();
-	    },
-	    error: function(jqXHR, error){
-		console.log(error);
-		console.log(jqXHR);
-		Retina.WidgetInstances.main[1].showRunningInboxActions();
-	    },
-	    crossDomain: true,
-	    headers: stm.authHeader,
-	    type: "GET",
-	});
-
-    };
-
-    widget.showRunningInboxActions = function () {
-	var widget = Retina.WidgetInstances.main[1];
-
-	var target = document.getElementById('inboxActions');
-	var data = [];
-	var d = widget.inboxData;
-	for (var i=0; i<d.length; i++) {
-	    if (d[i].tasks[0].inputs[0].filename != "submission_parameters.json") {
-		data.push(d[i]);
-	    }
-	}
-
-	var html = "<p style='text-align: center; font-style: italic;'>- no actions running on files in your inbox -</p>";
-	if (data && data.length > 0) {
-	    html = "<table class='table table-condensed' style='font-size: 12px;'><tr><th>file</th><th>action</th><th>status</th><th></th></tr>";
-	    for (var i=0; i<data.length; i++) {
-		var fn = data[i].tasks[0].inputs[0].filename;
-		var task = data[i].tasks[0].cmd.description;
-		var colors = { "in-progress": "green",
-			       "suspend": "red",
-			       "pending": "orange",
-			       "queued": "blue" };
-		var title = data[i].state;
-		var isError = "";
-		var errorText = "";
-		if (title == "suspend") {
-		    isError = " class='alert alert-error'";
-		    if (data[i].hasOwnProperty('stdout')) {
-			data[i].stdout = data[i].stdout.replace(/^Error[\s\t]*/, "");
-			data[i].stdout = data[i].stdout.replace(/'/ig, "");
-			errorText = " cursor: help;' title='"+data[i].stdout;
-		    }
-		}
-		var status = '<span style="color: '+colors[title]+';font-size: 19px; cursor: default;" title="'+title+'">&#9679;</span>';
-		html += "<tr"+isError+"><td style='padding-right: 5px;"+errorText+"'>"+fn+"</td><td>"+task+"</td><td style='text-align: center;'>"+status+"</td><td><button class='btn btn-mini btn-danger' title='cancel action' onclick='if(confirm(\"really cancel this action?\")){Retina.WidgetInstances.main[1].cancelInboxAction(\""+data[i].id+"\");}'>&times;</button></td></tr>";
-	    }
-	    html += "</table>";
-	}
-	
-	target.innerHTML = html;
-    };
-
-    widget.checkFileHasAction = function (filename) {
-	var widget = Retina.WidgetInstances.main[1];
-	
-	var data = widget.inboxData;
-
-	var task = false;
-	for (var i=0; i<data.length; i++) {
-	    if (filename == data[i].tasks[0].inputs[0].filename) {
-		task = data[i].tasks[0].cmd.description;
-		break;
-	    }
-	}
-	
-	return task;
-    };
-
     // generate a tab separated file that shows details about the files in the inbox
     widget.downloadInboxDetails = function () {
 	var widget = Retina.WidgetInstances.main[1];
@@ -872,6 +677,119 @@
 	
 	stm.saveAs(txt.join("\n"), "inbox.txt");
     };
+
+    // contact AWE
+    widget.AWEQuery = function (params) {
+	var widget = this;
+	
+	// set default values
+	var url = RetinaConfig.awe.url;
+	var method = params.method || "GET";
+	var resource = params.resource || "job";
+	var query = "";
+	
+	// check if we have a query
+	if (params.query) {
+	    var qarray = [];
+	    for (var i in params.query) {
+		if (params.query.hasOwnProperty(i)) {
+		    if (typeof params.query[i] == 'object') {
+			for (var h=0; h<params.query[i].length; h++) {
+			    qarray.push(i+"="+params.query[i][h]);
+			}
+		    } else {
+			qarray.push(i+"="+params.query[i]);
+		    }
+		}
+	    }
+	    query = "?query&" + qarray.join("&");
+	}
+
+	// construct the url
+	url += resource + query;
+	var ajaxParams = {
+	    success: function(data){
+		params.callback.call(Retina.WidgetInstances.main[1], data);
+	    },
+	    error: function(jqXHR, error){
+		Retina.WidgetInstances.main[1].handleAWEError(jqXHR);
+	    },
+	    crossDomain: true,
+	    headers: { "Authorization": "OAuth "+stm.user.token },
+	    type: method,
+	    processData: false
+	}
+
+	if (params.data) {
+	    ajaxParams.headers["Datatoken"] = stm.user.token;
+	    ajaxParams.data = params.data;
+	    ajaxParams.contentType = false;
+	}   
+
+	// perform the query
+	jQuery.ajax(url, ajaxParams);
+    };
+
+    // AWE queries
+    widget.AWESubmission = function (params) {
+	var widget = this;
+	
+	params.variables.job_name = stm.user.login+"_"+params.workflow+(params.job ? params.job : "");
+	params.variables.user_id = stm.user.id;
+	params.variables.user_name = stm.user.login;
+	params.variables.user_email = stm.user.email;
+	params.variables.clientgroups = RetinaConfig.awe.clientgroups;
+	params.variables.shock_url = RetinaConfig.shock_url;
+	var template = params.template || "submission";
+	jQuery.ajax(RetinaConfig.awe.workflows+"/"+params.workflow+".awf", {
+	    success: function(jqXHR){
+
+	    },
+	    error: function(jqXHR){
+		var data = jqXHR.responseText;
+		var widget = Retina.WidgetInstances.main[1];
+		for (var i in params.variables) {
+		    if (params.variables.hasOwnProperty(i)) {
+			data = data.replace(new RegExp("\\[%\\s*"+i+"\\s*%\\]","ig"), params.variables[i]);
+		    }
+		}
+		data = new Blob([ data ], { "type" : "text\/json" });
+		var form = new FormData();
+		form.append('upload', data, "workflow.awf");
+		widget.AWEQuery( { "method": "POST", "data": form, "callback": widget.AWEResponse } );
+
+		Retina.WidgetInstances.main[1].handleAWEError(jqXHR);
+	    }
+	});
+    };
+
+    widget.AWEJoblist = function () {
+	var widget = this;
+
+	widget.AWEQuery({ "query": { "info.user": stm.user.id,
+				     "state": [ "queued", "in-progress", "suspend", "error", "init", "pending" ],
+				     "offset": 0,
+				     "limit": 500 },
+			  "callback": widget.AWEJoblistResponse });
+    };
+
+    // AWE responses
+    widget.AWESubmissionResponse = function(response) {
+	var widget = this;
+
+	console.log(response);
+    };
+
+    widget.AWEJoblistResponse = function (response) {
+	var widget = this;
+
+	
+    };
+
+    widget.handleAWEError = function (call) {
+	var widget = this;
+	
+    }
 
     // helper functions
     widget.expander = function () {

@@ -1,0 +1,37 @@
+{
+    "info": {
+        "pipeline": "inbox_seq_stats",
+        "name": "[% job_name %]",
+        "user": "[% user_id %]",
+        "clientgroups": "[% clientgroups %]"
+    },
+    "shockhost": "[% shock_url %]",
+    "tasks": [
+        {
+            "cmd": { "args": "",
+                     "name": "",
+                     "description": "",
+		     "environ": {} },
+	    "app": {
+		"name": "amplicon/inbox.sequenceStats.default",
+		"app_args": [
+                    {
+                        "resource": "shock",
+                        "filename": "[% seq_file %]",
+                        "node": "[% seq_file_id %]",
+                        "host": "[% shock_url %]"
+                    },
+                    {
+                        "resource": "string",
+                        "value": "[% file_type %]"
+                    }
+                ]
+		},
+            "dependsOn": [],
+            "inputs": [],
+            "outputs": [],
+            "taskid": "0",
+            "totalwork": 1
+        }
+    ]
+}

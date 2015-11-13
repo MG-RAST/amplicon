@@ -42,6 +42,7 @@
 			    return;
 			}
 			stm.user = data.user;
+			stm.user.token = data.token;
 			stm.authHeader = { "Authorization": "mgrast "+data.token};
 			main.display({ "main": document.getElementById("content"),
 				       "sidebar": document.getElementById("sidebar") });

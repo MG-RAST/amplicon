@@ -7,7 +7,11 @@ var RetinaConfig = {
 		       		    "useHeader": true,
 				    "loginField": "login" }
 		     },
-    "shock_url": "http://shock.metagenomics.anl.gov",
-    "awe_url": "140.221.67.82",
     "authentication": true,
+    
+    "shock_url": "http://shock.metagenomics.anl.gov",
+    
+    "awe": { "url": "http://140.221.67.82:8001/",
+	     "clientgroups": "Inbox",
+	     "workflows": "workflows" }
 };
