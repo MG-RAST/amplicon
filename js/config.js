@@ -9,7 +9,9 @@ var RetinaConfig = {
 		     },
     "authentication": true,
     
+    "mgrast_api": "http://api-dev.metagenomics.anl.gov",
     "shock_url": "http://shock.metagenomics.anl.gov",
+    "awe_url": "http://awe.metagenomics.anl.gov",
     
     "awe": { "url": "http://140.221.67.82:8001/",
 	     "clientgroups": "Inbox",
