@@ -1,0 +1,54 @@
+# App definition
+cwlVersion: v1.0
+class: CommandLineTool
+baseCommand: vsearch
+hints:
+	DockerRequirement:
+		dockerPull: mgrast/pipeline:20160817.1213
+inputs:
+	mergepairs:
+		type: File
+		inputBinding:
+			prefix: -fastq_mergepairs
+			position: 1
+	reverse:
+		type: File
+		inputBinding:
+			prefix: -reverse
+			position: 2
+	minovlen:
+		type: int
+		inputBinding:
+			prefix: -fastq_minovlen
+			position: 3
+	minmergelen:
+		type: int
+		inputBinding:
+			prefix: -fastq_minmergelen
+			position: 4
+	allowmergestagger :
+		type: boolean
+		inputBinding:
+			prefix: -fastq_allowmergestagger 
+	out:
+		type: File
+		inputBinding:
+			prefix: -fastqout
+	log:
+		type: File
+		inputBinding:
+			prefix: -log
+	
+outputs: 
+	out:
+		type: File
+		outputBinding:
+			glob: $(inputs.out)
+	log:
+		type: File
+		outputBinding:
+			glob: $(inputs.log)
+
+
+
+
