@@ -5,11 +5,11 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   cython \
   hmmer \
   mafft \
+  mothur \
   ncbi-blast+  \
   perl \
   python \
   velvet
-
 
 ADD http://spades.bioinf.spbau.ru/release3.6.0/SPAdes-3.6.0-Linux.tar.gz /tmp/ 
 RUN tar xzf /tmp/SPAdes-3.6.0-Linux.tar.gz && \
@@ -20,7 +20,6 @@ ADD http://microbiology.se/sw/ITSx_1.0.11.tar.gz /
 RUN cd / && tar xvzf ITSx_1.0.11.tar.gz && \
     ln -s ITSx_1.0.11 ITSx
 
-
 ADD http://microbiology.se/sw/Metaxa2_2.0.2.tar.gz /
 RUN cd / && tar xvzf /Metaxa2_2.0.2.tar.gz && \
     cd /Metaxa2_2.0.2 && \ 
@@ -29,13 +28,11 @@ RUN cd / && tar xvzf /Metaxa2_2.0.2.tar.gz && \
 # install cutadapt (we do not use the debian unstable source package)
 RUN pip install -y cutadapt 
 
-
 # python scripts from Robert 
 ADD http://drive5.com/python/python_scripts.tar.gz /
 RUN cd /usr/local/bin && \
     tar xzvf /python_scripts.tar.gz && \
     rm /python_scripts.tar.gz
-
 
 # fastx_toolkit
 ADD http://hannonlab.cshl.edu/fastx_toolkit/fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2 /fastx_bin/
