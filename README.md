@@ -1,1 +1,1 @@
-# amplicon
+# amplicon pipeline
