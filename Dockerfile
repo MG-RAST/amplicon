@@ -43,5 +43,16 @@ RUN cd /fastx_bin/ && \
     tar -xjf fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2 && \
     mv /fastx_bin/bin/* /usr/local/bin/
 
+RUN cd /root \
+	&& wget https://github.com/torognes/vsearch/archive/v2.0.2.tar.gz \
+	&& tar xzf v2.0.2.tar.gz \
+	&& cd vsearch-2.0.2 \
+	&& ./autogen.sh \
+	&& ./configure --prefix=/usr/local/ \
+	&& make \
+	&& make install \
+	&& make clean \
+	&& cd .. \
+&& rm -rf /root/vsearch-2.02 /root/v2.0.2.tar.gz
 
 
