@@ -8,7 +8,6 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   ncbi-blast+  \
   perl \
   python \
-  python-2.7-dev  \
   velvet
 
 
@@ -28,10 +27,8 @@ RUN cd / && tar xvzf /Metaxa2_2.0.2.tar.gz && \
     echo -e "yes\n/usr/local/bin/\nyes\n" | ./install_metaxa2
 
 # install cutadapt (we do not use the debian unstable source package)
-RUN git clone https://github.com/marcelm/cutadapt.git && \
-    cd cutadapt && \ 
-    python setup.py install && \
-    python setup.py build_ext -i
+RUN pip install -y cutadapt 
+
 
 # python scripts from Robert 
 ADD http://drive5.com/python/python_scripts.tar.gz /
