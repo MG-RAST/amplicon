@@ -1,0 +1,10 @@
+usearch_global:
+	class: File
+	path: ./tmp/queries.fasta
+db:
+	class: File
+	path: ./tmp/db.fasta
+id: 0.9
+alnout:
+  class: File
+  path: output.fasta
