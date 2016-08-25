@@ -1,8 +1,8 @@
 (function () {
     var widget = Retina.Widget.extend({
         about: {
-                title: "Amplicon Pipeline Widget",
-                name: "main",
+                title: "Amplicon Upload Widget",
+                name: "upload",
                 author: "Tobias Paczian",
                 requires: [ ]
         }
@@ -41,7 +41,24 @@
 	sidebar.innerHTML = sidehtml;
 
 	// title
-	var html = "";
+	var html = '<div class="wizard span12">\
+	  <div>\
+	    <li class="active"></li>\
+	    <a href="#">upload<img src="Retina/images/cloud-upload.png"></a>\
+	  </div>\
+	  <div class="separator">›</div>\
+	  <div>\
+	    <li></li>\
+	    <a href="?page=submission" class="active">submit<img src="images/forward.png"></a>\
+	  </div>\
+	  <div class="separator">›</div>\
+	  <div>\
+	    <li></li>\
+	    <a href="?page=pipeline">progress<img src="Retina/images/settings3.png"></a>\
+	  </div>\
+</div><div style="clear: both; height: 20px;"></div>';
+
+	html += "<div style='margin-bottom: 20px;'><h3>amplicon pipeline upload</h3><p>The submission to the amplicon pipeline is a three step process. First you upload your sequences to your personal inbox. The file will automatically be verified to ensure that it can successfully pass through the pipeline. In the second step you select options and provide some additional information about your files, before you perform the actual submission. In the third phase you can monitor the progress of your job.</p></div>";
 
 	// shockbrowser space
 	html += "<div id='browser'></div>";
@@ -106,7 +123,7 @@
 
 	    // check if we have enough space to show the sidebar
 	    widget.checkScreenWidth();
-	    window.onresize = Retina.WidgetInstances.main[1].checkScreenWidth;
+	    window.onresize = Retina.WidgetInstances.upload[1].checkScreenWidth;
 
 	    widget.AWEJoblist();
 
@@ -117,7 +134,7 @@
 
     // do some convenience checks before the file is uploaded
     widget.fileSelectedForUpload = function (selectedFile, customIndex) {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	// detect filetype
 	var ret = widget.detectFiletype(selectedFile.name);
@@ -147,7 +164,7 @@
 		var data = e.target.result;
 		var html = "";
 		var allow = true;
-		var validBarcode = Retina.WidgetInstances.main[1].validateBarcode(data).valid;
+		var validBarcode = Retina.WidgetInstances.upload[1].validateBarcode(data).valid;
 		var allow = true;
 		if (validBarcode) {
 		    html = "<div class='alert alert-success' style='margin-top: 20px;'>This is a valid barcode file.</div>";
@@ -289,7 +306,7 @@
     };
 
     widget.filePreview = function (params) {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	var html = "<h5 style='margin-bottom: 0px;'>File Information</h5>";
 
@@ -330,7 +347,7 @@
 		if (fileHash.hasOwnProperty(noSuffix+"fastq")) {
 		    html += "<div class='alert alert-info' style='margin-top: 20px;'>This file has already been converted to fastq.</div>";
 		} else {
-		    html += "<div id='convert'><button class='btn btn-small' onclick='Retina.WidgetInstances.main[1].sff2fastq(\""+node.id+"\");'>convert to fastq</button></div>";
+		    html += "<div id='convert'><button class='btn btn-small' onclick='Retina.WidgetInstances.upload[1].sff2fastq(\""+node.id+"\");'>convert to fastq</button></div>";
 		}
 	    }
 	    if (filetype == "excel") {
@@ -345,7 +362,7 @@
 		    jQuery.ajax(url, {
 			data: { "node_id": node.id },
 			success: function(data){
-			    Retina.WidgetInstances.main[1].metadataValidationResult(data, node.id);
+			    Retina.WidgetInstances.upload[1].metadataValidationResult(data, node.id);
 			},
 			error: function(jqXHR, error){
 			    console.log(error);
@@ -362,7 +379,7 @@
 		if (! params.data) {
 		    html += "<div class='alert alert-info' style='margin-top: 20px;'>This file is empty.</div>";
 		} else {
-		    var validation = Retina.WidgetInstances.main[1].validateBarcode(params.data);
+		    var validation = Retina.WidgetInstances.upload[1].validateBarcode(params.data);
 		    var barcodes = validation.barcodes;
 		    var validBarcode = validation.valid;
 		    if (validBarcode) {
@@ -397,7 +414,7 @@
 			    html += indexOptions;
 			    html += "</select>";
 			    html += "barcodes are reverse complements <input type='checkbox' id='demultiplexIsReverseComplement' style='margin-top: -2px;'><div style='height: 10px;'></div>";
-			    html += "<button class='btn btn-mini' onclick='Retina.WidgetInstances.main[1].demultiplex(\""+node.id+"\");'>demultiplex</button></div>";
+			    html += "<button class='btn btn-mini' onclick='Retina.WidgetInstances.upload[1].demultiplex(\""+node.id+"\");'>demultiplex</button></div>";
 			}
 		    } else {
 			html += "<div class='alert alert-warning' style='margin-top: 20px;'>This file is not a valid barcode file. Barcode files must have a barcode sequence followed by a tab and a filename in each line, or be an automatically generated QIIME barcode file.</div>";
@@ -468,7 +485,7 @@
 		    html += "<span style='position: relative; bottom: 4px;'>Barcode file (optional)</span><select id='jpeBarcode' style='font-size: 12px; height: 25px; margin-left: 10px; width: 286px;'>"+txtOpts+"</select><br>";
 		    html += "barcodes are reverse complements <input type='checkbox' id='jpeIsReverseComplement' style='margin-top: -2px;'><div style='height: 10px;'></div>";
 		    html += "<span style='position: relative; bottom: 4px;'>Output file name</span><div class='input-append'><input type='text' placeholder='output file name' id='jpeOutfile' style='font-size: 12px; height: 16px; margin-left: 3px;' value='"+(partial.length > 1 ? partial + ".fastq" : "")+"'>";
-		    html += "<button class='btn btn-small' onclick='Retina.WidgetInstances.main[1].joinPairedEnds();'>join paired ends</button></div>";
+		    html += "<button class='btn btn-small' onclick='Retina.WidgetInstances.upload[1].joinPairedEnds();'>join paired ends</button></div>";
 		    html += "</div><div id='seqInfoDiv'>";
 
 		    // check if all sequences have a unique id
@@ -487,19 +504,19 @@
 		} else {
 		    widget.statsCalculation(node);
 		    
-		    html += "</h5><div class='alert alert-info'>calculation of sequence stats in progress <button class='btn btn-small' title='refresh' style='margin-left: 15px;' onclick='Retina.WidgetInstances.main[1].browser.updateData();'><img src='Retina/images/loop.png' style='width: 12px; margin-top: -2px;'></button></div>";
+		    html += "</h5><div class='alert alert-info'>calculation of sequence stats in progress <button class='btn btn-small' title='refresh' style='margin-left: 15px;' onclick='Retina.WidgetInstances.upload[1].browser.updateData();'><img src='Retina/images/loop.png' style='width: 12px; margin-top: -2px;'></button></div>";
 		}
 	    }
 	    
 	    html += "<h5 style='margin-top: 10px;'>Delete File</h5>";
-	    html += "<button class='btn btn-small btn-danger' onclick='if(confirm(\"Really delete this file?\\nThis cannot be undone!\")){Retina.WidgetInstances.main[1].browser.removeNode({node:\""+node.id+"\"});}'>delete file</button>";
+	    html += "<button class='btn btn-small btn-danger' onclick='if(confirm(\"Really delete this file?\\nThis cannot be undone!\")){Retina.WidgetInstances.upload[1].browser.removeNode({node:\""+node.id+"\"});}'>delete file</button>";
 	}
 
 	return html;
     };
 
     widget.fileCompleted = function (data, currentIndex) {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	// get node from data
 	var nodes = data.data;
@@ -546,7 +563,7 @@
     };
 
     widget.allFilesCompleted = function (data) {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	widget.getRunningInboxActions();
 	widget.browser.preserveDetail = true;
@@ -554,7 +571,7 @@
     };
 
     widget.fileDeleted = function (deleted, node) {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	if (deleted && node) {
 	    if (node.attributes.hasOwnProperty('actions')) {
@@ -593,7 +610,7 @@
     };
 
     widget.joinPairedEnds = function () {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	var fileA = document.getElementById('jpeFileA').value;
 	var fileB = document.getElementById('jpeFileB').options[document.getElementById('jpeFileB').selectedIndex].value;
@@ -631,7 +648,7 @@
 	    data: d,
 	    success: function(data){
 		document.getElementById('joinPairedEndsDiv').innerHTML = '<div class="alert alert-info" style="margin-top: 20px;">This file is being processed with join paired ends</div>';
-		Retina.WidgetInstances.main[1].getRunningInboxActions();
+		Retina.WidgetInstances.upload[1].getRunningInboxActions();
 	    },
 	    error: function(jqXHR, error){
 		document.getElementById('joinPairedEndsDiv').innerHTML = '<div class="alert alert-error" style="margin-top: 20px;">join paired ends failed</div>';
@@ -648,7 +665,7 @@
 
     // generate a tab separated file that shows details about the files in the inbox
     widget.downloadInboxDetails = function () {
-	var widget = Retina.WidgetInstances.main[1];
+	var widget = Retina.WidgetInstances.upload[1];
 
 	var files = widget.browser.fileList;
 	var sequences = [];
@@ -709,10 +726,10 @@
 	url += resource + query;
 	var ajaxParams = {
 	    success: function(data){
-		params.callback.call(Retina.WidgetInstances.main[1], data);
+		params.callback.call(Retina.WidgetInstances.upload[1], data);
 	    },
 	    error: function(jqXHR, error){
-		Retina.WidgetInstances.main[1].handleAWEError(jqXHR);
+		Retina.WidgetInstances.upload[1].handleAWEError(jqXHR);
 	    },
 	    crossDomain: true,
 	    headers: { "Authorization": "OAuth "+stm.user.token },
@@ -747,7 +764,7 @@
 	    },
 	    error: function(jqXHR){
 		var data = jqXHR.responseText;
-		var widget = Retina.WidgetInstances.main[1];
+		var widget = Retina.WidgetInstances.upload[1];
 		for (var i in params.variables) {
 		    if (params.variables.hasOwnProperty(i)) {
 			data = data.replace(new RegExp("\\[%\\s*"+i+"\\s*%\\]","ig"), params.variables[i]);
@@ -758,7 +775,7 @@
 		form.append('upload', data, "workflow.awf");
 		widget.AWEQuery( { "method": "POST", "data": form, "callback": widget.AWEResponse } );
 
-		Retina.WidgetInstances.main[1].handleAWEError(jqXHR);
+		Retina.WidgetInstances.upload[1].handleAWEError(jqXHR);
 	    }
 	});
     };

@@ -28,10 +28,13 @@
 	
 	stm.init({});	
 	Retina.init({});
+	var page = Retina.cgiParam('page') || 'upload';
+	Retina.load_widget(page).then( function() {
 	    
-	Retina.load_widget("main").then( function() {
-	    var main = Retina.Widget.create('main', { "main": document.getElementById("content"),
-						      "sidebar": document.getElementById("sidebar") }, true);
+	    var main = Retina.Widget.create(page, { "main": document.getElementById("content"),
+										   "sidebar": document.getElementById("sidebar") }, true);
+
+	    document.getElementById('title').innerHTML = page;
 	    
 	    Retina.load_widget({"name": "login", "resource": "Retina/widgets"}).then( function() {
 		var loginAction = function (data) {
@@ -71,7 +74,7 @@
       
       <!-- logo and title -->
       <div style="float: left; margin-left: 50px;">
-	<h2>Amplicon Pipeline</h2>
+	<h2><img src="images/favicon.ico" style="width: 32px; margin-right: 20px; position: relative; bottom: 3px;">Amplicon Pipeline - <span id="title">upload</span></h2>
       </div>
 	  	  
       <div style="float: right; margin-top: 7px;">
