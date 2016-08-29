@@ -40,7 +40,7 @@ inputs:
       prefix: --id
   alnout:
     label: output file
-    type: File?
+    type: string?
     inputBinding:
       prefix: --alnout			 
   out:
@@ -53,15 +53,15 @@ inputs:
       prefix: -log
 outputs:
   alnout:
-    type: File
+    type: File?
     outputBinding:
       glob: $(inputs.alnout) 
   out:
-    type: File
+    type: File?
     outputBinding:
       glob: $(inputs.out)
   log:
-    type: File
+    type: File?
     outputBinding:
       glob: $(inputs.log)
 
