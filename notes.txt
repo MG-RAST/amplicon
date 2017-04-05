@@ -1,0 +1,27 @@
+# unite taxonomy 
+# already has mothur taxonomy
+
+run insilico PCR on the fasta file with the primer pairs (remove primers)
+use only matching sequences
+grab only IDs for matchign sequences from taxonomy file, mothur requires 1=1 mapping 
+
+
+# 
+SILVA
+
+remove EUKARYA
+*****
+remove all whitespaces in tax string
+
+>HQ008858.1.1482 Bacteria;Proteobacteria;Gammaproteobacteria;Aeromonadales;Aeromonadaceae;Aeromonas;Aeromonas sp. LH2
+
+sk__Bacteria;P=Proteobacteria; C=Gammaproteobacteria;F=Aeromonodales;G=Aeromoas;S=Aeromonas_sp._LH2
+
+check if there are non six ranks taxonomy strings in SILVA
+
+
+UNITE
+*****
+SH221606.07FU_UDB013960_reps    k__Fungi;p__Basidiomycota;c__Agaricomycetes;o__Russulales;f__Russulaceae;g__Russula;s__Russula_sp;
+-->
+SH221606.07FU_UDB013960_reps sk__Eukaryota; k__Fungi;p__Basidiomycota;c__Agaricomycetes;o__Russulales;f__Russulaceae;g__Russula;s__Russula_sp;

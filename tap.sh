@@ -1,28 +1,60 @@
 #!/bin/bash
 
+
 ###
 # OPTIONS are declared here
 ###
-declare VSEARCH_GLOBAL="--threads 4"
+declare THREADS=4  # use 4 THREADS whereever possible
+declare VSEARCH_GLOBAL="--threads ${THREADS}"
 
 shopt -s globstar
 shopt -s extglob
+set -e
 
+######################################################################################
+######################################################################################
+######################################################################################
+# STAGE=0001    prepare UNITE and SIVLA fasta database files and taxonomy tables
+# STAGE=0050    Mate pair merging 
+# STAGE=0055    barcode label into fastq header
+# STAGE=0060    PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
+# STAGE=0100    target specific primer removal using cutadpt
+# STAGE=0200    dereplicating exactly identical reads
+# STAGE=0300    OTUclustering
+# STAGE=0400    16s ribosomal feature extraction via Metaxa [PROK]
+#               ITS feature extraction via ITSx [EUK]
+# STAGE=0500    map cleaned reads against centroid sequences (vsearch -userarch_global) [PROK]
+#               map cleaned reads against centroid sequences (vsearch -fastx_getseqs) [EUK]
+# 
+# STAGE=0600    format conversion to .otu files
+# STAGE=0700    classification using mothur 
+
+
+
+#################
+#
 function usage {
   echo "Usage: $0 [-i] [-h help] <FILES>"
   echo "$0 <FILES> assume *.R1.fastq.gz and *.R2.fastq.gz files"
   echo "$0 [-i] switch to ION torrent mode"
   echo "$0 [-t] tidy up, leave only minimal files behind"
+  echo "$0 -e <primer> -- the Eukaryote primer pair e.g. \"-g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$ \" "
+  echo "$0 -p <primer> -- the Prokaryote primer pair e.g. \"-g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$\" "
+  echo "$0 using cutadapt syntax, primers have to be anchored with ^ and $"
 }
 
+################
+#
 # get options
-while getopts thvi option; do
+while getopts e:p:thvi option; do
     case "${option}"
         in
 		h) usage; exit;;
     v) verbose=1;;
     t) TIDY=1;;
     i) ION_TORRENT=1;;
+    p) EUKARYOTE_PRIMER_PAIR=${OPTARG} ;;
+    e) PROKARYOTE_PRIMER_PAIR=${OPTARG} ;;
 		*)
 		usage
 		;;
@@ -40,473 +72,481 @@ then
   exit 1
 fi
 
+# use default primer sequences 
+if [[ ! ${EUKARYOTE_PRIMER_PAIR} ]]
+then
+  if [[ ${verbose} ]]
+  then
+    echo "$0 -- using default primer sequences for Eukaryotes"
+  fi
+  declare EUKARYOTE_PRIMER_PAIR="-g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$"
+  
+ 
+fi
+# use default primer sequences 
+if [[ ! ${PROKARYOTE_PRIMER_PAIR} ]]
+then
+  if [[ ${verbose} ]]
+  then
+    echo "$0 -- using default primer sequences for Prokaryotes"
+  fi
+  declare PROKARYOTE_PRIMER_PAIR="-g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$ "
+fi
+
+
 if [[ ${verbose} ]]
 then
   echo "$0 creating input copy of files as *.tap.100.fastq.gz"
   echo "$0 we can only handle compressed fastq as fastq.gz with R1 and R2 in the names e.g.  foo_bar1.R1.fastq.gz"
   echo "$0 foo is e.g. Euka and bar is e.g. forest3 ; assumption is that numerical suffix in bar allows grouping"
-  echo "$0 filename: [Euka|Prok].<string><int>.R<int>.fastq.gz"
+  echo "$0 filename: [Euka|Prok].<string><int>.R<int>.fastq.gz, e.g. Euka.forest3.R1.fastq.gz"
 fi
+
+###
+# prepare UNITE and SIVLA fasta database files and taxonomy tables
+###
+STAGE=0001
+if [[ ${verbose} ]]
+then
+ echo "$0 0012 prepare UNITE and SIVLA fasta database files and taxonomy tables using cutadapt"
+fi
+rm -f ${STAGE}.log
+
+# adapter removal (source code @ https://cutadapt.readthedocs.org/en/stable/)
+declare CUTADAPT_PARAM="-e 0.06 -f fasta " #"--discard-untrimmed"
+
+# create "clean" version of primer strings
+prok_forward=$(echo ${PROKARYOTE_PRIMER_PAIR} | awk -F^ ' { print $2 }' | cut -f1 -d\  )
+prok_reverse=$(echo ${PROKARYOTE_PRIMER_PAIR} | awk -F^ ' { print $2 }' | cut -f2 -d- | cut -f2 -d\  | tr -d '$')
+
+# local DB directory, this might be better stored in SHOCK in the long run as a global thingy
+mkdir -p db
+
+# if there is no primer pair specific version of SILVA, create one
+if [[ ! -e db/SILVA.${prok_forward}.${prok_reverse} ]]
+then
+  
+  if [[ ${verbose} ]]
+  then
+   echo "$0 creating a new SILVA ePCR version for the primers"
+  fi
+  
+  cutadapt -g ${prok_forward} \
+           -a ${prok_reverse} \
+           ${CUTADAPT_PARAM} \
+           /usr/local/share/db/SILVA*.fasta \
+           -o db/SILVA.${prok_forward}.${prok_reverse} \
+           >> ${STAGE}.log
+fi
+
+echo "$0 FM--> Martin:: do we need to run this again and trim reverse complement and then also use --discard-untrimmed"
+# create "clean" version of primer strings
+euka_forward=$(echo ${EUKARYOTE_PRIMER_PAIR} | awk -F^ ' { print $2 }' | cut -f1 -d\  )
+euka_reverse=$(echo ${EUKARYOTE_PRIMER_PAIR} | awk -F^ ' { print $2 }' | cut -f2 -d- | cut -f2 -d\  | tr -d '$')
+
+# if there is no primer pair specific version of SILVA, create one
+if [[ ! -e db/UNITE.${euka_forward}.${euka_reverse} ]]
+then
+  
+  if [[ ${verbose} ]]
+  then
+   echo "$0 creating a new SILVA ePCR version for the primers"
+  fi
+  
+  cutadapt -g ${euka_forward} \
+           -a ${euka_reverse} \
+           ${CUTADAPT_PARAM} \
+            --discard-untrimmed \
+           /usr/local/share/db/UNITE*.fasta \
+           -o db/UNITE.${euka_forward}.${euka_reverse} \
+           >> ${STAGE}.log
+fi
+
+#grab only IDs for matchign sequences from taxonomy file, mothur requires 1=1 mapping 
+echo "$0 still need to prune the UNIT taxonomy "
 
 ### 
 #   create input files
 ###
 STAGE=0010
-for i in $(ls -1 ${FILES}  )
+for file in $(ls -1 ${FILES}  )
 do
-  if [[ "${i}" != *tap* ]]
-  then
-    name=$(basename $i .fastq.gz)
-    cp $i ${name}.tap.${STAGE}.fastq.gz
-  else
-    if [[ "${verbose2}" ]]
-    then  
-      echo "skipping $i"
-    fi 
+  if [[ "${file}" != *tap* ]] 
+    then 
+      name=$(basename ${file} .fastq.gz)
+      out_file=${name}.tap.${STAGE}.fastq
+      if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+        then
+          if [[ $verbose ]]
+          then
+            echo "skipping $file";
+          fi
+        else
+          gzip -d -c ${file} >${out_file}
+        fi
   fi    
 done
 
+ 
+ ###
+ # Mate pair merging 
+ ###
+ STAGE=0050 
+ if [[ ${verbose} ]]
+ then
+  echo "$0 ${STAGE} merging mate pairs with vsearch "
+ fi
+ rm -f ${STAGE}.log
+
+ for file in *R1.tap.0010.fastq
+ do
+   name=$(basename ${file} .R1.tap.0010.fastq)
+   out_file=${name}.tap.${STAGE}.fastq
+  
+   if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+   then 
+     if [[ $verbose ]]
+     then
+       echo "$0 skipping $out_file, already exists"
+     fi
+   else
+     vsearch ${VSEARCH_GLOBAL} \
+          --fastq_mergepairs  ${name}.R1.tap.0010.fastq*  \
+          --reverse ${name}.R2.tap.0010.fastq* \
+          --fastqout ${out_file} \
+          >> ${STAGE}.log 2>&1
+   fi
+ done
+ 
+ 
+ ###
+ # add labels to header
+ ###
+ STAGE=0055
+ if [[ ${verbose} ]]
+ then
+  echo "$0 ${STAGE} add labels to fastq header"
+ fi
+ rm -f ${STAGE}.log
+ 
+ for file_name in *.tap.0050.fastq.gz
+  do
+    name=$(basename "${file_name}" .tap.0050.fastq )
+    out_file=$($name.tap.${STAGE}.fastq )
+    # there is no output file, create one
+      if [ -f ${out_file} ] || [ ${file_name} -ot ${out_file} ]
+      then 
+        if [[ $verbose ]]
+        then
+          echo "$0 skipping $out_file, already exists"
+        fi
+      else
+        zcat ${file_name} |  awk -v "pat=$name" -F ' ' ' {print (NR%4 == 1) ? $1 ";barcodelabel=" pat  : $0} ' > ${out_file}
+      fi
+  done
+ 
+ 
+ ###
+ # PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
+ ###
+ STAGE=0060
+ if [[ ${verbose} ]]
+ then
+  echo "$0 ${STAGE} remove PhiX contaminants using bowtie2"
+ fi
+ rm -f ${STAGE}.log
+ 
+ export BOWTIE2_INDEXES=/usr/local/share/db/bowtie2
+ for file_name in *.tap.0055.fastq
+  do
+    name=$(basename "${file_name}" .tap.0055.fastq )
+    out_file=${name}.tap.${STAGE}.fastq
+   
+    # there is no output file, create one
+      if [ -f ${out_file} ] || [ ${file_name} -ot ${out_file} ]
+      then 
+        if [[ $verbose ]]
+        then
+          echo "$0 skipping $out_file, already exists"
+        fi
+      else
+        cmd="bowtie2 -p ${THREADS} -x genome --un ${out_file} -U ${file_name} -S /dev/null"
+        echo ${cmd} >> ${STAGE}.log
+        ${cmd} >> ${STAGE}.log  2>&1
+      fi
+
+  done
+
 ###
-###
-#  add filename as "barcode" to fastq header
-###
+# remove specified primer in input sequences using cutadpt
 ###
 STAGE=0100
 if [[ ${verbose} ]]
 then
-  echo "$0 10->100 removing any existing *.tap.200 files; creating labels inside the fastq files from filenames; saving as *.tap.200.fastq"
+ echo "$0 ${STAGE} removing target specific primers  using cutadpt"
 fi
-# remove any leftovers from the last run
-rm -f *.tap.${STAGE}*
-# create fastq files with modified header to include barcode labels e.g. "barcodelabel=Euka.forest1;"
-for file_name in *.R1.tap.0010.fastq.gz
- do
-   name=$(basename "${file_name}" .R1.tap.0010.fastq.gz )
-   new_file=$(echo ${name} | awk -F\. '{ print $1}')
-   zcat ${file_name} |  awk -v "pat=$name" -F ' ' ' {print (NR%4 == 1) ? $1 ";barcodelabel=" pat  : $0} ' >> "${new_file}".R1.tap.${STAGE}.fastq  
- done
-
-
-for file_name in *.R2.tap.0010.fastq.gz
- do
-   name=$(basename "${file_name}" .R2.tap.0010.fastq.gz )
-      new_file=$(echo ${name} | awk -F\. '{ print $1}')
-   zcat ${file_name} |  awk -v "pat=$name" -F ' ' ' {print (NR%4 == 1) ? $1 ";barcodelabel=" pat  : $0} ' >> "${new_file}".R2.tap.${STAGE}.fastq
- done
-
-###
-# Mate pair merging with PEAR
-###
-STAGE=0200 
-if [[ ${verbose} ]]
-then
- echo "$0 100->200 merging mate pairs with PEAR into *.merged.tap.0200.fastq"
-fi
-
-declare PEAR_PARAMS="--min-overlap 50 --min-assembly-length 300 "
-for file in *R1.tap.0100.fastq
-do
-  name=$(basename ${file} .R1.tap.0100.fastq)
-  cmd="pear ${PEAR_PARAMS} -f  "${name}".R1.tap.0100.fastq  -r "${name}".R2.tap.0100.fastq -o "${name}".merged.tap.${STAGE}.fastq"
-  echo ${cmd} >${name}.tap.${STAGE}.log
-#  $cmd  >> ${name}.tap.${STAGE}.log
-  mv "${name}".merged.tap.${STAGE}.fastq.assembled.fastq "${name}".tap.${STAGE}.fastq
-  
-  if [[ ${TIDY} ]]
-  then
-    rm -f ${name}.merged.tap.${STAGE}.fastq.discarded.fastq
-    rm -f ${name}.merged.tap.${STAGE}.fastq.unassembled.forward.fastq 
-    rm -f ${name}.merged.tap.${STAGE}.fastq.unassembled.reverse.fastq 
-  fi
-  
-done
-
-
-# PEAR replaces usearch
-# declare USEARCH_PARAMS="-fastq_minovlen 50 -fastq_minmergelen 300 -fastq_allowmergestagger"
-# mate pair merging, we can use the 32 bit version of the usearch, if we split the files correctly into 1GB chunks
-#usearch -fastq_mergepairs 1_P.R1.fastq -reverse 1_P.R2.fastq ${USEARCH_PARAMS} -fastqout 2_P.umerge.fastq -log 2_P.umerge.log
-#usearch -fastq_mergepairs 1_E.R1.fastq -reverse 1_E.R2.fastq ${USEARCH_PARAMS} -fastqout 2_E.umerge.fastq -log 2_E.umerge.log
-
-###
-# Error correction with Spades and vsearch
-###
-STAGE=0300
-if [[ ${verbose} ]]
-then
- echo "$0 200->300 error correcting with Spades into *.300.fastq"
-fi
-# spades for error correction (spades download http://spades.bioinf.spbau.ru/release3.6.0/SPAdes-3.6.0.tar.gz or http://bioinf.spbau.ru/en/content/spades-download-0)
-# used to be
-#usearch -fastq_filter 3_P.umerge.bayeshammer/corrected/2_P.umerge.00.0_0.cor.fastq -fastqout 3_P.umerge.bayeshammer.fastq
-
-if [[ ${ION_TORRENT} ]]
-then
-  declare SPADES_PARAM="--threads 4 --only-error-correction --disable-gzip-output --iontorrent"
-else 
-  declare SPADES_PARAM="--threads 4 --only-error-correction --disable-gzip-output "
-fi
-
-for file in *.tap.0200.fastq
-do
-  name=$(basename ${file} .tap.0200.fastq) 
-  cmd="spades.py ${SPADES_PARAM} -s ${file} -o ${name}.tap.${STAGE}.dir "
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-#  ${cmd} >> ${name}.tap.${STAGE}.log
- 
-  cmd="vsearch ${VSEARCH_GLOBAL} \
-    -fastq_filter ${name}.tap.${STAGE}.dir/corrected/*.fastq \
-    -fastqout ${name}.tap.${STAGE}.fastq" 
-  echo ${cmd} >> ${name}.tap.${STAGE}.log
- # $cmd >> ${name}.tap.${STAGE}.log  2>&1
-  
-  if [[ ${TIDY} ]]
-  then
-    rm -rf ${name}.tap.${STAGE}.dir
-  fi
-done
-
-###
-# Adapter removal using cutadpt
-###
-STAGE=0400
-if [[ ${verbose} ]]
-then
- echo "$0 300->400 removing adapters using cutadpt, creating *.400.fastq [currently disabled]"
-fi
+rm -f ${STAGE}.log
 
 # adapter removal (source code @ https://cutadapt.readthedocs.org/en/stable/)
 declare CUTADAPT_PARAM="-e 0.06 -f fastq --trimmed-only"
 
-declare ADAPTER1="-g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$ "
-declare ADAPTER2="-g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$"
-
-
-for file in *.tap.0300.fastq
+for file in Euka*.tap.0060.fastq
 do
-  name=$(basename ${file} .tap.0300.fastq) 
-
-  # run both or run one ## how do we decide?
-#  cutadapt ${ADAPTER1} ${CUTADAPT_PARAM} ${file}  -o ${name}.tap.${STAGE}.fastq > ${name}.tap.${STAGE}.log
-#  cutadapt ${ADAPTER2} ${CUTADAPT_PARAM} ${file}  -o ${name}.tap.${STAGE}.fastq > ${name}.tap.${STAGE}.log
-#cutadapt ${ADAPTER2} ${CUTADAPT_PARAM}  3_E.umerge.bayeshammer.fastq -o 4_E.umerge.bayeshammer.cutprim.fastq
-  echo "$0 FM:: we need to iterate over all adapters --> check with Martin <--"
+  name=$(basename ${file} .tap.0060.fastq) 
+  out_file=${name}.tap.${STAGE}.fastq
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+  then 
+    if [[ $verbose ]]
+    then
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else
+      cutadapt ${EUKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} >> ${STAGE}.log
+    fi
 done
 
-
-###
-# denoising again with vsearch
-###
-STAGE=0500
-if [[ ${verbose} ]]
-then
- echo "$0 300->500 de-noising with vsearch, creating *.600.fastq"
-fi
-# filter low quality reads?
-declare VSEARCH_FILTER_OPTS="${VSEARCH_GLOBAL} -fastq_maxee 1"
-for file in *.tap.0300.fastq
+for file in Prok*.tap.0060.fastq
 do
- name=$(basename ${file} .tap.0300.fastq) 
-
- cmd="vsearch ${VSEARCH_FILTER_OPTS} \
-   -fastq_filter ${file} \
-   -fastqout ${name}.tap.${STAGE}.fastq"
- echo ${cmd} > ${name}.tap.${STAGE}.log
-# $cmd >> ${name}.tap.${STAGE}.log  2>&1
+  name=$(basename ${file} .tap.0060.fastq) 
+  out_file=${name}.tap.${STAGE}.fastq
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+  then 
+    if [[ $verbose ]]
+    then
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else
+      cutadapt  ${PROKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} >> ${STAGE}.log  
+    fi
 done
 
-#usearch -fastq_filter 4_P.umerge.bayeshammer.cutprim.fastq -fastqout 5_P.umerge.bayeshammer.cutprim.maxee1.fastq -fastq_maxee 1
-#usearch -fastq_filter 4_E.umerge.bayeshammer.cutprim.fastq -fastqout 5_E.umerge.bayeshammer.cutprim.maxee1.fastq -fastq_maxee 1
-
-
-set -e
-
+echo "$0 FM---> Martin remind me why should I run this twice? # run twice to get forward and reverse adapters"
 
 ###
 # dereplicating exactly identical reads
 ###
-STAGE=0600
+STAGE=0200
 if [[ ${verbose} ]]
 then
- echo "$0 500->600 de-replicating with vsearch, creating *.700.fastq [might need to be optional step]"
+ echo "$0 ${STAGE} de-replicating with vsearch"
 fi
+
+rm -f ${STAGE}.log
 declare VSEARCH_DEREP_OPTIONS="${VSEARCH_GLOBAL} -sizeout -minuniquesize 2"
+echo "$0 vsearch --derep :: MARTIN --> SHOULD we use --strand both?"
 
-for file in *.tap.0500.fastq
+for file in *.tap.0100.fastq
 do
-  name=$(basename ${file} .tap.0500.fastq) 
- # dereplication of full length identical reads? 
-  echo "$0 vsearch --derep :: MARTIN --> SHOULD we use --strand both?"
-  cmd="vsearch ${VSEARCH_DEREP_OPTIONS} \
-       -derep_fulllength ${file} \
-       -output ${name}.tap.${STAGE}.fasta "
-  echo $cmd > ${name}.tap.${STAGE}.log 
-#  ${cmd} >> ${name}.tap.${STAGE}.log  2>&1
-
+   name=$(basename ${file} .tap.0100.fastq) 
+   # dereplication of full length identical reads? 
+   out_file=${name}.tap.${STAGE}.fastq
+   if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+   then 
+     if [[ $verbose ]]
+     then
+       echo "$0 skipping $out_file, already exists"
+     fi
+     else
+        cmd="vsearch ${VSEARCH_DEREP_OPTIONS} \
+             -derep_fulllength ${file} \
+             -output ${name}.tap.${STAGE}.fasta "
+        echo $cmd >> ${STAGE}.log 
+        ${cmd} >> ${stage}.log  2>&1
+    fi  
 done
 
 ###
 # OTUclustering
 ###
-STAGE=0700
+STAGE=0300
 if [[ ${verbose} ]]
 then
- echo "$0 600->700 OTUclustering via vsearch"
+ echo "$0 ${STAGE} OTUclustering via vsearch"
 fi
+
+rm -f ${STAGE}.log
 
 declare VSEARCH_OTU_CLUST_PARAMS="${VSEARCH_GLOBAL} -sizein -sizeout --id 0.97  " # removed " -otu_radius_pct 3 "
-for file in *.tap.0600.fasta
+
+for file in *.tap.0200.fasta
 do
-  name=$(basename ${file} .tap.0600.fasta) 
+  name=$(basename ${file} .tap.0200.fasta) 
   prefix=$(echo $name | cut -d. -f1 )
 
-  cmd="vsearch ${VSEARCH_OTU_CLUST_PARAMS} \
-        -cluster_size ${file} \
-        -relabel "OTU${prefix:0:1}_" \
-        -centroids ${name}.tap.${STAGE}.fasta \
-        --biomout ${name}.tap.${STAGE}.biom "
-  echo $cmd > ${name}.tap.${STAGE}.log
-  $cmd >> ${name}.tap.${STAGE}.log  2>&1
+  out_file=${name}.tap.${STAGE}.fastq
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+  then 
+    if [[ $verbose ]]
+    then
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else 
+      cmd="vsearch ${VSEARCH_OTU_CLUST_PARAMS} \
+            -cluster_size ${file} \
+            -relabel "OTU${prefix:0:1}_" \
+            -centroids ${name}.tap.${STAGE}.fasta " # "\
+           # --biomout ${name}.tap.${STAGE}.biom "
+      echo $cmd >> ${STAGE}.log
+      $cmd >> ${STAGE}.log  2>&1
+    fi
 done
 
-# OTU clustering
-# was: usearch -cluster_otus 6_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.fasta -otu_radius_pct 3 -otus 7_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.fasta -uparseout 7_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.up -relabel OTUp_ -sizein -sizeout
 
 
 ###
-# Chimera removal 
+# 16s ribosomal feature extraction via Metaxa
 ###
-STAGE="0800"
+STAGE="0400"
+
 if [[ ${verbose} ]]
 then
- echo "$0 700->800 Chimera removal "
+ echo "$0 ${STAGE} 16s ribosomal read extraction via Metaxa"
 fi
+rm -f ${STAGE}.log
 
-declare VSEARCH_SIM_PARAMS="${VSEARCH_GLOBAL}  -strand plus  "
-for file in "Pro*.tap.0700.fasta" # Prok.tap.0700.fasta
-do
-  name=$(basename ${file} .tap.0700.fasta) 
- 
-  cmd="vsearch ${VSEARCH_SIM_PARAMS} \
-       -db uchime_reference.greengenes.fasta \
-       -uchime_ref ${name}.tap.0700.fasta   \
-       -nonchimeras ${name}.tap.${STAGE}.fasta"
-  echo ${cmd} > ${name}.tap.${STAGE}.log
- # $cmd >> ${name}.tap.${STAGE}.log  2>&1
-done
-
-for file in "Euk*.tap.0700.fasta"
-do
-  name=$(basename ${file} .tap.0700.fasta) 
-  
-  cmd="vsearch ${VSEARCH_SIM_PARAMS} \
-       -db uchime_reference.unite.fasta \
-       -uchime_ref ${name}.tap.0700.fasta   \
-       -nonchimeras ${name}.tap.${STAGE}.fasta"
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-  #$cmd >> ${name}.tap.${STAGE}.log  2>&1
-done
-
-echo "missing:: uchime_reference.greengenes.fasta AND uchime_reference.unite.fasta"
-  
-# SIM Search open source uchime tool to replace commercial usearch: http://drive5.com/uchime/uchime4.2.40_src.tar.gz
-#usearch -uchime_ref 7_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.fasta -db uchime_reference.greengenes.fasta -nonchimeras 8_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.fasta -strand plus
-#usearch -uchime_ref 7_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.fasta -db uchime_reference.unite.fasta -nonchimeras 8_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.fasta -strand plus
-
-###
-# Prok Taxa determination from SIMs via Metaxa
-###
-STAGE="0900"
-set -xv 
-if [[ ${verbose} ]]
-then
- echo "$0 800->900 Prok Taxa calling using Metaxa"
-fi
-# ?? open source metaxa2 http://microbiology.se/sw/Metaxa2_2.0.2.tar.gz
 declare METAXA_PARMS="-t a,b --complement F --cpu 4"
 
-echo "Using stage 0700 instead of 0800 as we are missing reference DBs for stage 0800 for now"
-
-
-for file in Prok*.tap.0700.fasta
+for file in Prok*.tap.0300.fasta
 do
-  name=$(basename "${file}" .tap.0700.fasta) 
+  name=$(basename ${file} .tap.0300.fasta) 
 
-  cmd="metaxa2_x ${METAXA_PARMS} -i ${file}  -o ${name}.tap.${STAGE}.metaxa "
-  echo $cmd > ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log 2>&1
+  out_prefix=${name}.tap.${STAGE}.metaxa
+
+  if [ -f ${out_prefix}.extraction.fasta ] || [ ${file} -ot ${out_prefix}.extraction.fasta  ]
+  then 
+    if [[ $verbose ]]
+    then
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else 
+
+        cmd="metaxa2_x ${METAXA_PARMS} -i ${file}  -o ${out_prefix}"
+        echo $cmd >> ${STAGE}.log
+        ${cmd} >> ${STAGE}.log 2>&1
   
-  # remove the comments added by metaxa
-  cut -d"|" -f1 ${name}.tap.${STAGE}.metaxa.extraction.fasta  > ${name}.tap.${STAGE}.fasta
-  
+        # remove the comments added by metaxa
+        cut -d\| -f1 ${out_prefix}.extraction.fasta > ${name}.tap.${STAGE}.fasta
+      fi
   if [[ ${TIDY} ]]
     then
       rm -rf ${name}.tap.${STAGE}.metaxa.*
     fi
 done 
-#was :: metaxa2_x -i 8_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.fasta -o 9_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa -t a,b --complement F --cpu 4
-
 
 ###
-# ITS using ITSx
+# ITS feature extraction via ITSx
 ###
 if [[ ${verbose} ]]
 then
- echo "$0 800->0900 Euk Taxa calling using ITSx"
+ echo "$0 ${STAGE} ITS read extraction via ITSx"
 fi
-declare ITSx_PARMS="--complement F --cpu 4 --preserve T --only_full "
 
-for file in Euk*.tap.0800.fasta
+declare ITSx_PARMS="--complement F --cpu 4 --preserve T --only_full --reset "
+
+for file in Euk*.tap.0300.fasta
 do
- 
-  name=$(basename ${file} .tap.0800.fasta) 
-  cmd="/root/ITSx/ITSx ${ITSx_PARMS} -i ${file} -o ${name}.tap.${STAGE}.itsx"
-  echo ${cmd} > ${name}.tap.${STAGE}.log 
-  ${cmd} >> ${name}.tap.${STAGE}.log2>&1
-  
-  cmd2="awk '/^>/{sub(">","",$1);print $1}' ${name}.tap.${STAGE}.itsx.ITS2.fasta > ${name}.tap.${STAGE}.list "
-  mv ${name}.tap.${STAGE}.itsx.ITS2.fasta > ${name}.tap.${STAGE}.fasta
+  name=$(basename ${file} .tap.0300.fasta) 
+  out_file=${name}.tap.${STAGE}.list
+  out_prefix=${name}.tap.${STAGE}.itsx
 
-  if [[ ${TIDY} ]]
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file}  ]
+  then 
+    if [[ $verbose ]]
     then
-      rm -rf ${name}.tap.${STAGE}.itsx.*
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else # create a .list file with valid features  
+      cmd="ITSx ${ITSx_PARMS} -i ${file} -o ${out_prefix}"
+      echo ${cmd} >> ${STAGE}.log 
+      ${cmd} >> ${STAGE}.log 2>&1
+
+     awk '/^>/{sub(">","",$1);print $1}' ${out_prefix}.ITS2.fasta  > ${out_file} 
+    fi
+  done
+
+###
+# map cleaned reads against centroid sequences
+###
+STAGE="0500"
+if [[ ${verbose} ]]
+then
+ echo "$0 ${STAGE} map cleaned reads against centroid sequences"
+fi
+
+rm -f ${STAGE}.log
+
+for file in *.tap.0400.fasta
+do
+  name=$(basename ${file} .tap.0400.fasta) 
+  out_file=${name}.tap.${STAGE}.fastq
+  
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+  then 
+    if [[ $verbose ]]
+    then
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else 
+       cmd="vsearch ${VSEARCH_GLOBAL}  \
+          -strand plus \
+          -id 0.97 \
+          -maxaccepts 0 \
+          -top_hits_only \
+          -maxrejects 0
+          -usearch_global ${name}.tap.0300.fasta \
+          -db ${name}.tap.0400.fasta \
+          -uc ${name}.tap.${STAGE}.uc \
+          -matched ${out_file}"
+      echo ${cmd} >> ${STAGE}.log
+      ${cmd} >> ${STAGE}.log  2>&1
     fi
 done
-
-#awk '/^>/{sub(">","",$1);print $1}' 9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.ITS2.fasta > 9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.ITS2.list
-
-exit
-
-###
-# 16s DB search 
-###
-STAGE="1000"
-if [[ ${verbose} ]]
-then
- echo "$0 900->1000 16s DB search"
-fi
-declare VSEARCH_DB_SEARCH_PARAMS="${VSEARCH_GLOBAL} -strand plus -id 0.97 -maxaccepts0 -top_hit_only -maxrejects 0 "
-for file in Prok*.tap.0900.fasta
-do
-  name=$(basename ${file} .tap.0900.fasta) 
-  cmd="vsearch ${VSEARCH_DB_SEARCH_PARAMS} \
-      -usearch_global ${name}.tap.0500.fastq \
-      -db ${name}.tap.0900.fasta \
-      -uc ${name}.tap.${STAGE}.uc \
-      -matched ${name}.tap.${STAGE}.mappedseqs.fasta"
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log  2>&1
-
-done
-# Search for one (default) or a few high-identity hits to a database ==> the next calls can be replaced with vsearch (@ https://github.com/torognes/vsearch)
-#usearch -usearch_global 5_P.umerge.bayeshammer.cutprim.maxee1.fastq -db 9_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.fasta -strand plus -id 0.97 -maxaccepts0 -top_hit_only -maxrejects 0 -uc 10_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.mappedseqs.uc -matched 10_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.mappedseqs.fasta
-
-
-###
-# search for hits  ITS DB
-###
-if [[ ${verbose} ]]
-then
- echo "$0 950->1050 Euk ITS extraction using vsearch"
-fi
-for file in Euka*.tap.0950.fasta
-do
-  name=$(basename ${file} .tap.0950.fasta) 
-  
-  cmd="vsearch ${VSEARCH_GLOBAL} -fastx_getseqs ${name}.tap.0800.fasta \
-        -labels ${name}.tap.0900.list \
-        -fastaout ${name}.tap.${STAGE}.fasta "
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log  2>&1
-
-done
-
-#Extract sequences from a FASTA or FASTQ file.
-#usearch -fastx_getseqs 8_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.fasta -labels 9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.ITS2.list -fastaout 9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.clean.fasta
-
-
-###
-# ITS DB search 
-###
-STAGE="1100"
-if [[ ${verbose} ]]
-then
- echo "$0 10?0->1100 format conversion "
-fi
-declare VSEARCH_DB_SEARCH_PARAMS="${VSEARCH_GLOBAL} -strand plus -id 0.97 -maxaccepts0 -top_hit_only -maxrejects 0 "
-for file in *.tap.0950.fasta
-do
-  name=$(basename ${file} .tap.0950.fasta) 
-  cmd="vsearch ${VSEARCH_DB_SEARCH_PARAMS} \
-      -usearch_global ${name}.tap.0500.fastq \
-      -db ${name}.tap.0900.fasta \
-      -uc ${name}.tap.${STAGE}.uc \
-      -matched ${name}.tap.${STAGE}.mappedseqs.fasta"
-   
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log  2>&1
-done
-
-#usearch -usearch_global 5_E.umerge.bayeshammer.cutprim.maxee1.fastq -db 9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.clean.fasta -strand plus -id 0.97 -maxaccepts 0 -top_hit_only -maxrejects 0 -uc 10_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.clean.mappedseqs.uc -matched 10_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.clean.mappedseqs.fasta
 
 ###
 # format conversion
 ###
-STAGE="1200"
+STAGE="0600"
 if [[ ${verbose} ]]
 then
- echo "$0 1100->1200 format conversion "
+ echo "$0 ${STAGE} format conversion "
 fi
 
+rm -f ${STAGE}.log
 # format conversion from http://drive5.com/python/python_scripts.tar.gz
-for file in *.tap.11?0.uc
+for file in *.tap.0500.uc
 do
-  name=$(basename ${file} .tap.11?0.fasta) 
-  cmd="uc2otutab.py  ${file} > ${name}.tap.${STAGE}.otus "
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log
+  name=$(basename ${file} .tap.0500.uc) 
+  out_file=${name}.tap.${STAGE}.otu
+
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
+  then 
+    if [[ $verbose ]]
+    then
+      echo "$0 skipping $out_file, already exists"
+    fi
+    else 
+      cmd="python /usr/local/bin/uc2otutab.py  ${file} > ${out_file} "
+      echo ${cmd} >> ${name}.tap.${STAGE}.log
+      ${cmd} >> ${STAGE}.log
+    fi
 done
-
-# METAXA
-#uc2otutab.py 10_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.mappedseqs.uc > 10_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.mappedseqs.otu
-# ITSx
-# /local/bin/uc2otutab.py 10_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.clean.mappedseqs.uc > 10_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.clean.mappedseqs.otu
-
-
-#cp 9_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.fasta ../3_taxonomy && cp 9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.ITS2.fasta ../3_taxonomy && cd ../3_taxonomy
-
-
-echo "$0 FM: Where do the DB files and templates come from"
-echo "$0 missing ITS2.itsx.unite.fasta, IITS2.itsx.unite.tax, ITS2.itsx.ncbi.fasta, ITS2.itsx.ncbi.tax, SSUv34.ipcr.silva.fasta, SSUv34.ipcr.silva.tax"
-
-# from Mothur download pages
-
-# SILVA
-# https://www.mothur.org/w/images/b/b4/Silva.nr_v128.tgz
-# template for chimera slayer
-# https://www.mothur.org/w/images/f/f1/Silva.gold.bacteria.zip
-
-
-# ITS
-# https://www.mothur.org/w/images/2/27/Unite_ITS_s_02.zip
-# 
-# https://www.mothur.org/w/images/4/49/Unite_ITS_02.zip
-
 
 
 exit
+
 ###
 # classification using mothur 
 ###
-STAGE="1300"
+STAGE="0700"
 MOTHUR_PARAMS="cutoff=60"
 if [[ ${verbose} ]]
 then
- echo "$0 12?0->1300 classification using mothur "
+ echo "$0 ${STAGE} classification using mothur "
 fi
-for file in Euka*.tap.11?0.uc
+
+for file in Euka*.tap.0500.uc
 do
-  name=$(basename ${file} .tap.0950.fasta) 
+  name=$(basename ${file} .tap.0900.fasta) 
 
   mothur_cmd="#classify.seqs(fasta=${name}.tap.01?0.fastq, \
     template=ITS2.itsx.ncbi.fasta, \
@@ -525,9 +565,9 @@ do
   ${cmd} >> ${name}.tap.${STAGE}.log
 done
 
-for file in Prok*.tap.11?0.uc
+for file in Prok*.tap.1100.uc
 do
-name=$(basename ${file} .tap.0950.fasta) 
+name=$(basename ${file} .tap.0900.fasta) 
 mothur_cmd="#classify.seqs(fasta=${name}.tap.01?0.fastq, \
   template=SSUv34.ipcr.silva.fasta, \
   taxonomy=SSUv34.ipcr.silva.tax, \

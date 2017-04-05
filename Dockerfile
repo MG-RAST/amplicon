@@ -13,6 +13,7 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   mafft \
   mothur \
   ncbi-blast+  \
+  pcrcgrep \
   perl \
   python \
   python-pip \
@@ -50,9 +51,11 @@ RUN pip install cutadapt
 # python scripts from Robert 
 RUN cd /root \
    && wget http://drive5.com/python/python_scripts.tar.gz \
-   && cd /usr/local/bin \
+   && mkdir download \
+   && cd download \
    && tar xzf /root/python_scripts.tar.gz \
-   && rm /root/python_scripts.tar.gz
+   && install -m755 * /usr/local/bin
+   && rm -rf /root/python_scripts.tar.gz /root/download
 
 # fastx_toolkit
 RUN cd /root \
@@ -64,14 +67,6 @@ RUN cd /root \
   && rm -rf /root/fastx_bin/
     
 
-# add PEAR matepair merger
-RUN cd /root \
-  && git clone https://github.com/xflouris/PEAR.git \
-  && cd PEAR \
-  && ./autogen.sh \
-  && ./configure \
-  && make install \
-  && rm -rf /root/PEAR
   
 
 # vsearch
@@ -87,13 +82,7 @@ RUN cd /root \
 	&& cd .. \
   && rm -rf /root/vsearch-* /root/v2*.tar.gz
 
-#https://downloads.sourceforge.net/project/bbmap/BBMap_37.02.tar.gz?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fbbmap%2F&ts=1491253864&use_mirror=cytranet
-# BBMap for its demultiplexing function
-# RUN cd /root \
-#  && wget https://downloads.sourceforge.net/project/bbmap/BBMap_37.02.tar.gz
-#  && tar xf BBMap* \
-#  && rm BBMap*.tar* \
-#  && cd bbmap
+
   
 # SILVA DB for 16s // requires primer pair specific post-processing
 # full version https://www.arb-silva.de/no_cache/download/archive/current/Exports/SILVA_128_SSURef_tax_silva_trunc.fasta.gz
@@ -110,8 +99,18 @@ RUN cd /root \
  && unzip sh_mothur_release*.zip \
  && mkdir -p /usr/local/share/db \
  && install -m644 UNITE*dynamic* /usr/local/share/db \
- && rm -f UNITE* sh*mothur*.zip
+ && rm -f UNITE* sh*mothur*.zip \
+ && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
  
+ 
+# phix DB from Illumina
+RUN cd /root \
+ && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
+ && tar xf PhiX*Illumina*.tar.gz \
+ && mkdir -p /usr/local/share/db/bowtie2 \
+ && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2 \
+ && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
+
    
   
   
