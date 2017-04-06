@@ -218,33 +218,7 @@ done
    fi
  done
  
- 
- ###
- # add labels to header
- ###
- STAGE=0055
- if [[ ${verbose} ]]
- then
-  echo "$0 ${STAGE} add labels to fastq header"
- fi
- rm -f ${STAGE}.log
- 
- for file_name in *.tap.0050.fastq.gz
-  do
-    name=$(basename "${file_name}" .tap.0050.fastq )
-    out_file=$($name.tap.${STAGE}.fastq )
-    # there is no output file, create one
-      if [ -f ${out_file} ] || [ ${file_name} -ot ${out_file} ]
-      then 
-        if [[ $verbose ]]
-        then
-          echo "$0 skipping $out_file, already exists"
-        fi
-      else
-        zcat ${file_name} |  awk -v "pat=$name" -F ' ' ' {print (NR%4 == 1) ? $1 ";barcodelabel=" pat  : $0} ' > ${out_file}
-      fi
-  done
- 
+
  
  ###
  # PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
@@ -257,9 +231,9 @@ done
  rm -f ${STAGE}.log
  
  export BOWTIE2_INDEXES=/usr/local/share/db/bowtie2
- for file_name in *.tap.0055.fastq
+ for file_name in *.tap.0050.fastq
   do
-    name=$(basename "${file_name}" .tap.0055.fastq )
+    name=$(basename "${file_name}" .tap.0050.fastq )
     out_file=${name}.tap.${STAGE}.fastq
    
     # there is no output file, create one
@@ -380,7 +354,7 @@ do
     then
       echo "$0 skipping $out_file, already exists"
     fi
-    else 
+    else #             -relabel "OTU${prefix:0:1}_" \
       cmd="vsearch ${VSEARCH_OTU_CLUST_PARAMS} \
             -cluster_size ${file} \
             -relabel "OTU${prefix:0:1}_" \
@@ -409,10 +383,10 @@ declare METAXA_PARMS="-t a,b --complement F --cpu 4"
 for file in Prok*.tap.0300.fasta
 do
   name=$(basename ${file} .tap.0300.fasta) 
-
+  out_file=${name}.tap.${STAGE}.fasta
   out_prefix=${name}.tap.${STAGE}.metaxa
 
-  if [ -f ${out_prefix}.extraction.fasta ] || [ ${file} -ot ${out_prefix}.extraction.fasta  ]
+  if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
   then 
     if [[ $verbose ]]
     then
@@ -425,11 +399,13 @@ do
         ${cmd} >> ${STAGE}.log 2>&1
   
         # remove the comments added by metaxa
-        cut -d\| -f1 ${out_prefix}.extraction.fasta > ${name}.tap.${STAGE}.fasta
+        cat ${out_prefix}.extraction.fasta | sed " s/\(^.*\)|.*/\1barcodelabel=${name};/g" > ${out_file}
+        
       fi
+      
   if [[ ${TIDY} ]]
     then
-      rm -rf ${name}.tap.${STAGE}.metaxa.*
+      rm -rf ${out_prefix}*
     fi
 done 
 
@@ -446,7 +422,7 @@ declare ITSx_PARMS="--complement F --cpu 4 --preserve T --only_full --reset "
 for file in Euk*.tap.0300.fasta
 do
   name=$(basename ${file} .tap.0300.fasta) 
-  out_file=${name}.tap.${STAGE}.list
+  out_file=${name}.tap.${STAGE}.fasta
   out_prefix=${name}.tap.${STAGE}.itsx
 
   if [ -f ${out_file} ] || [ ${file} -ot ${out_file}  ]
@@ -460,7 +436,13 @@ do
       echo ${cmd} >> ${STAGE}.log 
       ${cmd} >> ${STAGE}.log 2>&1
 
-     awk '/^>/{sub(">","",$1);print $1}' ${out_prefix}.ITS2.fasta  > ${out_file} 
+     # add barcode label to the fasta header
+     cat ${out_prefix}.ITS2.fasta  |  sed " s/^>\(.*\)$/>\1barcodelabel=${name};/g" > ${out_file}
+
+       if [[ ${STIDY} ]]
+         then 
+         rm -rf ${out_prefix}/*
+       fi 
     fi
   done
 
@@ -502,8 +484,11 @@ do
     fi
 done
 
+
+
+ 
 ###
-# format conversion
+# convert .uc to .otu files
 ###
 STAGE="0600"
 if [[ ${verbose} ]]
@@ -512,11 +497,15 @@ then
 fi
 
 rm -f ${STAGE}.log
-# format conversion from http://drive5.com/python/python_scripts.tar.gz
 for file in *.tap.0500.uc
 do
   name=$(basename ${file} .tap.0500.uc) 
   out_file=${name}.tap.${STAGE}.otu
+
+  ###
+  # add labels to header for uc file
+  ###
+
 
   if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
   then 
@@ -525,9 +514,9 @@ do
       echo "$0 skipping $out_file, already exists"
     fi
     else 
-      cmd="python /usr/local/bin/uc2otutab.py  ${file} > ${out_file} "
-      echo ${cmd} >> ${name}.tap.${STAGE}.log
-      ${cmd} >> ${STAGE}.log
+      cmd="uc2otu.pl  ${file}  "
+      echo ${cmd} >> ${STAGE}.log
+      ${cmd} > ${out_file}
     fi
 done
 
@@ -544,32 +533,39 @@ then
  echo "$0 ${STAGE} classification using mothur "
 fi
 
-for file in Euka*.tap.0500.uc
+rm -f ${STAGE}.log
+for file in Euka*.tap.0300.fasta
 do
-  name=$(basename ${file} .tap.0900.fasta) 
+  name=$(basename ${file} .tap.0300.fasta) 
 
-  mothur_cmd="#classify.seqs(fasta=${name}.tap.01?0.fastq, \
-    template=ITS2.itsx.ncbi.fasta, \
-    taxonomy=ITS2.itsx.ncbi.tax, \
-    ${MOTHUR_PARAMS})"
-  cmd="mothur ${mothur_cmd}"
-  echo ${cmd} > ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log
+# UNITE TAX + FASTA
+  mothur_cmd="#classify.seqs(fasta=${file}, \
+     template=/usr/local/share/db/UNITEv6_sh_dynamic_s.fasta,  \
+     taxonomy=/usr/local/share/db/UNITEv6_sh_dynamic_s.tax, \
 
-  mothur_cmd="#classify.seqs(fasta=${name}.tap.01?0.fastq, \
-    template=ITS2.itsx.unite.fasta, \
-    taxonomy=IITS2.itsx.unite.tax, \
-    ${MOTHUR_PARAMS})"
+     ${MOTHUR_PARAMS})"
   cmd="mothur ${mothur_cmd}"
-  echo ${cmd} >> ${name}.tap.${STAGE}.log
-  ${cmd} >> ${name}.tap.${STAGE}.log
-done
+  echo ${cmd} >> ${STAGE}.log
+  ${cmd} >> ${STAGE}.log
+
+  # what about ncbi taxonomy?
+    #taxonomy=ITS2.itsx.ncbi.tax, \
+
+# UNITE FASTA + NCBI TAX      
+#  mothur_cmd="#classify.seqs(fasta=${file}, \
+#    template=ITS2.itsx.unite.fasta, \
+#    taxonomy=ITS2.itsx.ncbi.tax, \
+#    ${MOTHUR_PARAMS})"
+#  cmd="mothur ${mothur_cmd}"
+#  echo ${cmd} >> ${name}.tap.${STAGE}.log
+#  ${cmd} #>> ${name}.tap.${STAGE}.log
+#done
 
 for file in Prok*.tap.1100.uc
 do
 name=$(basename ${file} .tap.0900.fasta) 
 mothur_cmd="#classify.seqs(fasta=${name}.tap.01?0.fastq, \
-  template=SSUv34.ipcr.silva.fasta, \
+  template=/usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta, \
   taxonomy=SSUv34.ipcr.silva.tax, \
   ${MOTHUR_PARAMS})"
 cmd="mothur ${mothur_cmd}"
@@ -578,9 +574,9 @@ echo ${cmd} > ${name}.tap.${STAGE}.log
 ${cmd} >> ${name}.tap.${STAGE}.log
 done
 
-# classification of OTUs (mothur download @ http://www.mothur.org/wiki/Download_mothur)
-#mothur "#classify.seqs(fasta=9_P.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.metaxa.extraction.clean.fasta, template=SSUv34.ipcr.silva.fasta, taxonomy=SSUv34.ipcr.silva.tax, cutoff=60)”
-#mothur 
-#"#classify.seqs(fasta=9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.ITS2.fasta, template=ITS2.itsx.ncbi.fasta, taxonomy=ITS2.itsx.ncbi.tax, cutoff=60)”
-#mothur "#classify.seqs(fasta=9_E.umerge.bayeshammer.cutprim.maxee1.derep.min2.otu97.uchimeref.ITSx.ITS2.fasta, template=ITS2.itsx.unite.fasta, taxonomy=ITS2.itsx.unite.tax, cutoff=60)"
+
+
+####
+exit
+
 
