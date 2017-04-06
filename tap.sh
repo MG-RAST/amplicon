@@ -131,12 +131,13 @@ then
    echo "$0 creating a new SILVA ePCR version for the primers"
   fi
   
-  cutadapt -g ${prok_forward} \
+  cmd="cutadapt -g ${prok_forward} \
            -a ${prok_reverse} \
            ${CUTADAPT_PARAM} \
            /usr/local/share/db/SILVA*.fasta \
-           -o db/SILVA.${prok_forward}.${prok_reverse} \
-           >> ${STAGE}.log
+           -o db/SILVA.${prok_forward}.${prok_reverse} "
+  
+  ${cmd} >> ${STAGE}.log
 fi
 
 echo "$0 FM--> Martin:: do we need to run this again and trim reverse complement and then also use --discard-untrimmed"
@@ -153,13 +154,15 @@ then
    echo "$0 creating a new SILVA ePCR version for the primers"
   fi
   
-  cutadapt -g ${euka_forward} \
+  cmd="cutadapt -g ${euka_forward} \
            -a ${euka_reverse} \
            ${CUTADAPT_PARAM} \
             --discard-untrimmed \
            /usr/local/share/db/UNITE*.fasta \
-           -o db/UNITE.${euka_forward}.${euka_reverse} \
-           >> ${STAGE}.log
+           -o db/UNITE.${euka_forward}.${euka_reverse}"
+
+  ${cmd} >> ${STAGE}.log
+
 fi
 
 #grab only IDs for matchign sequences from taxonomy file, mothur requires 1=1 mapping 
@@ -182,7 +185,8 @@ do
             echo "skipping $file";
           fi
         else
-          gzip -d -c ${file} >${out_file}
+          cmd="gzip -d -c ${file} >${out_file}"
+          ${cmd}
         fi
   fi    
 done
@@ -210,11 +214,11 @@ done
        echo "$0 skipping $out_file, already exists"
      fi
    else
-     vsearch ${VSEARCH_GLOBAL} \
+     cmd="vsearch ${VSEARCH_GLOBAL} \
           --fastq_mergepairs  ${name}.R1.tap.0010.fastq*  \
           --reverse ${name}.R2.tap.0010.fastq* \
-          --fastqout ${out_file} \
-          >> ${STAGE}.log 2>&1
+          --fastqout ${out_file} "
+     ${cmd} >> ${STAGE}.log 2>&1
    fi
  done
  
@@ -275,7 +279,8 @@ do
       echo "$0 skipping $out_file, already exists"
     fi
     else
-      cutadapt ${EUKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} >> ${STAGE}.log
+      cmd="cutadapt ${EUKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} "
+      ${cmd} >> ${STAGE}.log
     fi
 done
 
@@ -290,7 +295,8 @@ do
       echo "$0 skipping $out_file, already exists"
     fi
     else
-      cutadapt  ${PROKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} >> ${STAGE}.log  
+      cmd="cutadapt  ${PROKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} "
+      ${cmd} >> ${STAGE}.log  
     fi
 done
 
@@ -484,9 +490,6 @@ do
     fi
 done
 
-
-
- 
 ###
 # convert .uc to .otu files
 ###
@@ -505,8 +508,6 @@ do
   ###
   # add labels to header for uc file
   ###
-
-
   if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
   then 
     if [[ $verbose ]]
@@ -574,9 +575,5 @@ echo ${cmd} > ${name}.tap.${STAGE}.log
 ${cmd} >> ${name}.tap.${STAGE}.log
 done
 
-
-
-####
-exit
 
 
