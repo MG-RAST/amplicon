@@ -1,0 +1,55 @@
+cwlVersion: v1.0
+class: CommandLineTool
+baseCommand: [vsearch]
+
+
+requirements:
+  - class: InlineJavascriptRequirement
+  - class: InitialWorkDirRequirement
+    listing:
+      - entryname: $(inputs.file)
+   
+   
+label: Merge mate pairs   
+stdout: vsearch.log
+stderr: error.log
+          
+inputs:
+  threads:
+    label: 
+    doc: 
+    type: int
+    default: 4
+    inputBinding:
+      prefix: --threads
+ fastq_mergepairs:
+   label:
+   doc: <fastq>  
+   type: File
+   inputBinding:
+     prefix: --fastq_mergepairs
+ reverse:
+   label:
+   doc: <fastq>
+   type: File
+   inputBinding:
+     prefix: --reverse
+ fastqout:
+   label:
+   doc:
+   type: File
+   inputBinding:
+     prefix: --fastqout
+     
+                         
+outputs:
+  fastqout:
+    type: File
+    outputBinding:
+      glob: $(inputs.fastqout\)    
+  log:
+    type: stdout
+  err: 
+    type: stderr  
+    
+
