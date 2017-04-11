@@ -1,0 +1,40 @@
+cwlVersion: v1.0
+class: CommandLineTool
+baseCommand: [gzip]
+
+
+requirements:
+  - class: InlineJavascriptRequirement
+  - class: InitialWorkDirRequirement
+    listing:
+      - entryname: $(inputs.file)
+   
+stdout: gzip.log
+stderr: error.log
+
+ 
+inputs:
+  decompress:
+    label: 
+    doc: uncompress files
+    type: boolean?
+    inputBinding:
+      prefix: -d
+ file:
+   label: input
+   doc: <*.gz>  
+   type: File
+   inputBinding:
+     prefix:
+                         
+outputs:
+  unzipped:
+    type: File
+    outputBinding:
+      glob: $(inputs.file.nameroot)    
+  log:
+    type: stdout
+  err: 
+    type: stderr  
+    
+
