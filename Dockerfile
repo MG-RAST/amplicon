@@ -102,34 +102,7 @@ RUN cd /root \
 	&& cd .. \
   && rm -rf /root/vsearch-* /root/v2*.tar.gz
 
-  
-# SILVA DB for 16s // requires primer pair specific post-processing
-# full version https://www.arb-silva.de/no_cache/download/archive/current/Exports/SILVA_128_SSURef_tax_silva_trunc.fasta.gz
-RUN cd /root \
- && wget  --no-check-certificate https://www.arb-silva.de/fileadmin/silva_databases/current/Exports/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta.gz \
- && gunzip SILVA*.gz \
- && mkdir -p /usr/local/share/db \
- && install -m 644 SILVA*.fasta /usr/local/share/db \
- && rm -f SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta*
  
-# unite for ITS
-RUN cd /root \
- && wget --no-check-certificate https://unite.ut.ee/sh_files/sh_mothur_release_s_20.11.2016.zip \
- && unzip sh_mothur_release*.zip \
- && mkdir -p /usr/local/share/db \
- && install -m644 UNITE*dynamic* /usr/local/share/db \
- && rm -f UNITE* sh*mothur*.zip \
- && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
- 
- 
-# phix DB from Illumina
-RUN cd /root \
- && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
- && tar xf PhiX*Illumina*.tar.gz \
- && mkdir -p /usr/local/share/db/bowtie2 \
- && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2 \
- && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
-
    
 
 # install contents of bin directory in /usr/local/bin
