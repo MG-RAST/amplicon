@@ -36,8 +36,7 @@ RUN cd /root \
    && unzip sh_mothur_release*.zip \
    && mkdir -p /usr/local/share/db \
    && install -m644 UNITE*dynamic* /usr/local/share/db \
-   && rm -f UNITE* sh*mothur*.zip \
-   && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
+   && rm -f UNITE* sh*mothur*.zip 
  
  
 # phix DB from Illumina
@@ -58,10 +57,12 @@ RUN cd /root \
 RUN cd /root \
   && wget http://microbiology.se/sw/ITSx_1.0.11.tar.gz \
   && tar xzf ITSx_*.tar.gz \
-  && mkdir /usr/local/share/db \
+  && mkdir -p /usr/local/share/db \
   && install -m755 ITSx_*/ITSx /usr/local/bin \
   && mv ITSx_*/ITSx_db /usr/local/share/db \
   && ln -s /usr/local/share/db/ITSx_db /usr/local/bin/ITSx_db \
+  && cd /usr/local/share/db/ITSx_db/HMMs \
+  && for i in *.hmm ; do hmmpress -f $i ; done \
   && rm -rf ITSx_*.tar.gz ITSx_*
 
 RUN cd /root \
@@ -91,16 +92,16 @@ RUN cd /root \
 
 # vsearch
 RUN cd /root \
-	&& wget https://github.com/torognes/vsearch/archive/v2.4.2.tar.gz \
-	&& tar xzf v2*.tar.gz \
-	&& cd vsearch-2* \
+  && wget https://github.com/torognes/vsearch/archive/v2.4.3.tar.gz \
+  && tar xzf v*tar.gz \
+	&& cd vsearch-* \
 	&& ./autogen.sh \
 	&& ./configure --prefix=/usr/local/ \
 	&& make \
 	&& make install \
 	&& make clean \
 	&& cd .. \
-  && rm -rf /root/vsearch-* /root/v2*.tar.gz
+  && rm -rf /root/vsearch-* /root/v*.tar.gz
 
  
    
