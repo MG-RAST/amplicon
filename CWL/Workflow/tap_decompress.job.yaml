@@ -1,0 +1,9 @@
+mate_pair:
+  forward:
+    path: ../Data/Inputs/samples_R1.fastq.gz 
+    class: File
+    format: gz 
+  reverse:
+    class: File
+    path: ../Data/Inputs/samples_R2.fastq.gz 
+    format: fastq.gz 

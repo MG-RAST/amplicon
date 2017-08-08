@@ -1,0 +1,5 @@
+fastqin: 
+  class: File
+  path: ../Data/Inputs/sample.merged.fastq
+  format: fastq
+unaligned_out: unaligned.fasta
