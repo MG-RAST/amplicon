@@ -1,14 +1,26 @@
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: [cutadapt]
+
+label: cutadapt
+doc: none
+
+hints:
+  DockerRequirement:
+    dockerPull: mgrast/amplicon
+    # dockerPull: mgrast/cutadapt:1.0
+
+
 
 
 requirements:
   - class: InlineJavascriptRequirement
   # - class: InitialWorkDirRequirement
   
-stdout: ls.log
-stderr: error.log
+  
+stdout: cutadapt.log
+stderr: cutadapt.error
+
+
 
  # -g ${prok_forward} \
 #            -a ${prok_reverse} \
@@ -46,25 +58,33 @@ inputs:
     doc: Discard reads that do not contain the adapter
     type: boolean?                        
     inputBinding:
-      prefix: --discard-untrimmed      
-  reads:
+      prefix: --discard-untrimmed
+  trimmed-only:
+    label: trimmed-only
+    doc: .
+    type: boolean?
+    inputBinding:
+      prefix: --trimmed-only          
+  output:
+    label: output
+    doc:  Write reads to OUTPUT
+    type: string
+    inputBinding:
+      prefix: -o
+  sequences:
     label: 
     doc: input sequences
     type: File
     inputBinding:
-      position: 3
-  output:
-    label: output
-    doc:  Write trimmed reads to OUTPUT
-    type: string
-    inputBinding:
-      prefix: -o
+      position: 5    
+                    
+baseCommand: [cutadapt]                    
                     
 outputs:
-  readsFile:
+  processed:
     type: File
     outputBinding:
-      glob: $(inputs.o)    
+      glob: $(inputs.output)    
   log:
     type: stdout
   err: 
