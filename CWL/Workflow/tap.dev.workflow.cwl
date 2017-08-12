@@ -9,16 +9,19 @@ requirements:
   - class: InlineJavascriptRequirement
   - class: ScatterFeatureRequirement
   - class: MultipleInputFeatureRequirement
+  - class: SubworkflowFeatureRequirement
 
 inputs:
   unite:
     type: File
     format: 
-      - fasta  
+      - fasta
+    
   silva:
     type: File
     format: 
-      - fasta  
+      - fasta 
+   
   mate_pair: 
     doc: List of forward and reverse compressed fastq file records
     type:
@@ -54,45 +57,56 @@ inputs:
     doc: Euk and Prokaryote primer
     type:
       type: record
+      name: primer
       fields:
-        # - name: eukaryote
-        #   doc: Eukaryote primer pair
-        #   type:
-        #     type: record
-        #     fields:
-        #       - name: forward
-        #         type: string
-        #       - name: reverse
-        #         type: string
+        - name: eukaryote
+          doc: Eukaryote primer pair
+          type:
+            type: record
+            name: direction
+            fields:
+              - name: forward
+                type: string
+              - name: reverse
+                type: string
         - name: prokaryote
           doc: Prokaryote primer pair
           type:
+            name: direction
             type: record
             fields:
               - name: forward
                 type: string
               - name: reverse
                 type: string
+  indexDir:
+    type: Directory?
+    default: 
+      class: Directory
+      path: /usr/local/share/db/bowtie2  
     
-      
- 
-  
-  
-    
-
-# outputs:
-#   classified:
-#     type: File
-#     outputSource: classify/classified
  
 
 outputs:
   tmp:
     type: File[]
-    outputSource: [prep/classified_prok , prep/classified_euk] 
+    outputSource: [prep/classified_prok , prep/classified_euk]
+  raw:
+    type: Any
+    outputSource: [decompress/mate_pair_decompressed]
+  merged:
+    type: File
+    outputSource: [merging/fastq]
+  noPHIX:
+    type: File
+    outputSource: [PHIX/unaligned] 
+  noPrimer:
+    type: File
+    outputSource: [removePrimer/trimmed_sequences]        
   
 steps:
-  
+ 
+  # Conditional - only run if step output does not exist
   prep:  
     label: STAGE:0001    
     doc: prepare UNITE and SIVLA fasta database files and taxonomy tables
@@ -103,66 +117,95 @@ steps:
         valueFrom: $(self.eukaryote.forward)
       euka_reverse: 
         source: primer
-        valueFrom: $(self.primer.eukaryote.reverse)
-      euka_sequences:
-        default: /usr/local/share/db/UNITE*.fasta
-      prok_forward: 
+        valueFrom: $(self.eukaryote.reverse)
+      euka_sequences: unite
+        # source: unite
+        # default: /usr/local/share/db/UNITE*.fasta
+      prok_forward:
         default: "CCTAYGGGDBGCWSCAG"
-      prok_reverse: 
-        default: "ATTAGADACCCBNGTAGTCC"  
+      prok_reverse:
+        default: "ATTAGADACCCBNGTAGTCC"
       prok_sequences:
-        default: /usr/local/share/db/SILVA*.fasta 
+        source: silva
+        default: /usr/local/share/db/SILVA*.fasta
       
     out: [classified_prok , classified_euk]
   
-  # rename_and_uncompress:
- #    label: STAGE:0010
- #    doc: create tap input files, uncompress gzipped fastq input files and reaname them
- #    run: ../Tools/create_tap_input_files.tool.cwl
- #    in:
- #      sequences: File
- #    out: [uncompressed]
- #
- #
- #
- #  merging:
- #    label: STAGE:0050
- #    doc: Mate pair merging
- #    run: ../Tool/merge_mate_pairs.tool.cwl
- #    in:
- #      mate_pair: mate_pair
+  decompress:
+    label: STAGE:0010
+    doc: create tap input files, uncompress gzipped fastq input files and reaname them
+    run: ../Workflow/decompress_mate_pair.workflow.cwl
+    in:
+      mate_pair: mate_pair
+    out: [mate_pair_decompressed]
+    
+ 
+
+
+  merging:
+    label: STAGE:0050
+    doc: Mate pair merging
+    run: ../Tools/vsearch.tool.cwl
+    in:
+      # mate_pair: mate_pair
  #      stage:
  #        default: "0050"
- #      fastqout:
- #        source: mate_pair
- #        valueFrom: |
- #            $ {
- #              f = self.forward.basename
- #              prefix = f.replace( /\.R1.*$/ , '');
- #              return prefix + ".tap.0050.fastq" ;
- #            }
- #    out: [merged]
- #
+      fastqout:
+        source: decompress/mate_pair_decompressed
+        valueFrom: |
+            ${
+              var f       = self.forward.basename ;
+              var prefix  = f.replace( /[\.|_]R1.*$/ , '');
+              return prefix + ".tap.0050.fastq" ;
+            }
+      fastq_mergepairs:
+        source: decompress/mate_pair_decompressed
+        valueFrom: $(self.forward)
+      reverse: 
+        source: decompress/mate_pair_decompressed    
+        valueFrom: $(self.reverse)    
+      # threads:
+      #   valueFrom: $(runtime.cores) 
+    out: [fastq]
+    
+  PHIX:
+     label: STAGE:0060
+     doc: PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
+     run: ../Tools/bowtie2.tool.cwl
+     in:
+       fastqin: merging/fastq
+       unaligned_out: 
+         source: merging/fastq 
+         valueFrom:  $(self.basename.split(".")[0]).tap.0060.fastq
+                     # self.split("/").slice(-1)[0]
+       index: 
+         default: "genome"             
+       indexDir: indexDir
+         
+     out: [unaligned]
+     
+  removePrimer:
+    label: STAGE:0100
+    doc: target specific primer removal using cutadpt
+    run: ../Workflow/remove_euk_prok_primer.workflow.cwl
+    # cmd="cutadapt ${EUKARYOTE_PRIMER_PAIR}  ${CUTADAPT_PARAM} ${file} -o ${out_file} "
+    #  CUTADAPT_PARAM="-e 0.06 -f fasta "
+    in:
+      sequences: PHIX/unaligned
+      primer: primer
+      error: 
+        default: "0.06"
+
+    out: [trimmed_sequences]
+
+  
  #
  #
  #  barcode:
  #    label: STAGE:0055
  #    doc: barcode label into fastq header
  #
- #  removePHIX :
- #    label: STAGE:0060
- #    doc: PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
- #    run: ../Tool/remove_PHIX.tool.cwl
- #    in:
- #      fastqin: merging/merged
- #      unaligned_out: unaligned.fasta
- #      mate_pair: mate_pair
- #      stage:
- #        default: "0050"
- #      fastqout:
- #        source: mate_pair
- #
- #    out: [merged]
+
  #
  #
  #  removePrimer:
