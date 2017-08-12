@@ -1076,5 +1076,9 @@ outputs:
   info:
     type: stdout
   error: 
-    type: stderr  
+    type: stderr
+  fastq:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.fastqout)
   
