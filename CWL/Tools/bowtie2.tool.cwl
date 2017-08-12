@@ -34,8 +34,8 @@ requirements:
     
  
   
-stdout: PHIX.sam
-stderr: PHIX.error
+stdout: bowtie.sam
+stderr: bowtie.error
 
 
 inputs:
