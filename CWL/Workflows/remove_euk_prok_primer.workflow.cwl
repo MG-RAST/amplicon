@@ -113,6 +113,8 @@ steps:
       inputs:
         files:
           type: File[]
+          inputBinding:
+            position: 1
       outputs:
         merged:
           type: stdout 
