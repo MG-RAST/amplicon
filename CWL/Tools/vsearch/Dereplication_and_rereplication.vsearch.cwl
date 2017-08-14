@@ -131,8 +131,9 @@ outputs:
     type: File?
     outputBinding:
       glob: $(inputs.output)
-  uc:
+  uclust:
     type: File?
+    doc: uclust like output file
     outputBinding:
       glob: $(inputs.uc)        
   
