@@ -19,7 +19,7 @@ requirements:
 stdout: Dereplication_and_rereplication.log
 stderr: Dereplication_and_rereplication.error
 inputs:
-
+  
     maxuniquesize:
       type: int?
       doc: maximum abundance for output from dereplication
@@ -115,8 +115,14 @@ inputs:
       doc: output only n most abundant sequences after derep
       inputBinding:
         prefix: --topn
-outputs:
 
+arguments:
+  - prefix: --threads
+    valueFrom: $(runtime.cores)
+
+
+
+outputs:
   info:
     type: stdout
   error: 
