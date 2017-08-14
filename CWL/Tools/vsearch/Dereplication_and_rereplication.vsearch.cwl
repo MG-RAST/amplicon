@@ -120,5 +120,13 @@ outputs:
   info:
     type: stdout
   error: 
-    type: stderr  
+    type: stderr
+  fasta:
+    type: File?
+    outputBinding:
+      glob: $(inputs.output)
+  uc:
+    type: File?
+    outputBinding:
+      glob: $(inputs.uc)        
   
