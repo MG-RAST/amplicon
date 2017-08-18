@@ -24,9 +24,8 @@ requirements:
          var re = new RegExp("^" + inputs.index , "i");
          var files = inputs.indexDir.listing ;
          for (var f in files) {
-            var file = files[f] ;
+           var file = files[f] ;
            if ( re.test(file.basename) ){ list.push(file) }
-           else { list.push(inputs.index)}
          }
 
          return list;
@@ -85,7 +84,7 @@ outputs:
     type: stderr  
   
 
-$namespaces:
-  Formats: FileFormats.cv.yaml
+# $namespaces:
+#  Formats: FileFormats.cv.yaml
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"

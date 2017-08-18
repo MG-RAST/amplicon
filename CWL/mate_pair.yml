@@ -1,0 +1,5 @@
+type: record
+name: mate_pair
+fields:
+  forward: File
+  reverse: File
