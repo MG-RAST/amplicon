@@ -26,7 +26,7 @@ inputs:
       
   input:
     type: File
-    doc: input file
+    doc: uclast like input file
     inputBinding:
       position: -1
   output:
@@ -35,7 +35,7 @@ inputs:
  
 
 outputs:
-  output:
+  otu:
     type: stdout
   error: 
     type: stderr  
