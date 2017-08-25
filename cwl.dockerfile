@@ -14,6 +14,7 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   mafft \
   mothur \
   ncbi-blast+  \
+  node.js \
   pcregrep \
   perl \
   python \
