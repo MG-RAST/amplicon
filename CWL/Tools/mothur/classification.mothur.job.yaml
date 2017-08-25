@@ -1,0 +1,9 @@
+fasta:
+  class: File
+  path: ../../Data/Outputs/Prok.tap.0300.fasta
+reference_database:
+  class: File
+  path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta
+taxonomy_file: 
+  class: File
+  path:  ../../Data/Inputs/DBs/silva.nr_v128.tax

@@ -1,0 +1,13 @@
+strand: plus 
+reject_lower: 0.97
+maxaccepts: 0 
+top_hits_only: True
+maxrejects: 0
+usearch_global: 
+  class: File
+  path: ../Data/Outputs/Prok.tap.0300.fasta
+db: 
+  class: File
+  path: ../Data/Outputs/Prok.tap.0400.fasta.extraction.fasta
+uc: Prok.tap.0500.uc 
+matched: Prok.tap.0500.fastq

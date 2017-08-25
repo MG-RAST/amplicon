@@ -1,0 +1,6 @@
+profile: [ a, b]
+complement: F
+input: 
+  class: File
+  path: ../Data/Inputs/sequences.all.fasta
+prefix: 16s.ribosomal.feature.fasta
