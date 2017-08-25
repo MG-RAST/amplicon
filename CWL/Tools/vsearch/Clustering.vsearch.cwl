@@ -28,7 +28,7 @@ inputs:
 
     id:
       type: float?
-      doc: reject if identity lower, accepted values: 0-1.0
+      doc: reject if identity lower, accepted values:\ 0-1.0
       inputBinding:
         prefix: --id
 
@@ -192,5 +192,9 @@ outputs:
   info:
     type: stdout
   error: 
-    type: stderr  
+    type: stderr
+  centroidsFile:
+    type: File?
+    outputBinding:
+      glob: $(inputs.centroids)    
   
