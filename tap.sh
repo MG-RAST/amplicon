@@ -178,6 +178,7 @@ do
     then 
       name=$(basename ${file} .fastq.gz)
       out_file=${name}.tap.${STAGE}.fastq
+      echo Processing $out_file
       if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
         then
           if [[ $verbose ]]
@@ -185,11 +186,14 @@ do
             echo "skipping $file";
           fi
         else
-          cmd="gzip -d -c ${file} >${out_file}"
-          ${cmd}
+          cmd="gzip -d -c ${file}" #"> ${out_file}"
+          echo $cmd
+          $cmd > ${out_file}
+          #(${cmd}) | tee ${out_file}
         fi
   fi    
 done
+
 
  
  ###
@@ -204,8 +208,10 @@ done
 
  for file in *R1.tap.0010.fastq
  do
+   echo Processing $file 
    name=$(basename ${file} .R1.tap.0010.fastq)
    out_file=${name}.tap.${STAGE}.fastq
+   echo Writing to $name: ${name}.tap.${STAGE}.fastq
   
    if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
    then 
@@ -215,8 +221,8 @@ done
      fi
    else
      cmd="vsearch ${VSEARCH_GLOBAL} \
-          --fastq_mergepairs  ${name}.R1.tap.0010.fastq*  \
-          --reverse ${name}.R2.tap.0010.fastq* \
+          --fastq_mergepairs  ${name}.R1.tap.0010.fastq  \
+          --reverse ${name}.R2.tap.0010.fastq \
           --fastqout ${out_file} "
      ${cmd} >> ${STAGE}.log 2>&1
    fi
@@ -261,7 +267,7 @@ done
 STAGE=0100
 if [[ ${verbose} ]]
 then
- echo "$0 ${STAGE} removing target specific primers  using cutadpt"
+ echo "$0 ${STAGE} "
 fi
 rm -f ${STAGE}.log
 
@@ -269,7 +275,7 @@ rm -f ${STAGE}.log
 declare CUTADAPT_PARAM="-e 0.06 -f fastq --trimmed-only"
 
 for file in Euka*.tap.0060.fastq
-do
+do 
   name=$(basename ${file} .tap.0060.fastq) 
   out_file=${name}.tap.${STAGE}.fastq
   if [ -f ${out_file} ] || [ ${file} -ot ${out_file} ]
