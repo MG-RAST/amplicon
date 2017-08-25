@@ -122,7 +122,7 @@ inputs:
       inputBinding:
         prefix: --gapext
 
-    id:
+    reject_lower:
       type: float?
       doc: reject if identity lower
       inputBinding:
@@ -409,7 +409,20 @@ inputs:
       doc: show all, not just top hit with uc output
       inputBinding:
         prefix: --uc_allhits
+
+arguments:
+  - prefix: --threads
+    valueFrom: $(runtime.cores)        
+        
 outputs:
+  uclust:
+    type: File?
+    outputBinding:
+      glob: $(inputs.uc)
+  matched_sequences:
+    type: File?
+    outputBinding:
+      glob: $(inputs.matched)
 
   info:
     type: stdout
