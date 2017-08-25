@@ -38,19 +38,27 @@ inputs:
       
   profile:
     type:
+      # name: ProfileType
       type: array
       label: Profile set to use for the search 
       items:
         type: enum
+         # name: ProfilesListType
         label: profile type
         symbols: [ b, bacteria, a, archaea, e, eukaryota, m, mitochondrial, c, chloroplast, A, all, o, other ]
-    default: [all]
     inputBinding:
+      prefix: -t
       valueFrom: |
         ${
-          return $self.join() ;
+          if (self.length > 0) {
+            return self.join() ;
+          }
+          else{
+            return 'all' ;
+          }
+          
         }
-      prefix: -t
+      
     
   complement:
     type: 
@@ -72,10 +80,22 @@ arguments:
  
 
 outputs:
-  profiles:
+  summary:
     type: File
     outputBinding:
-      glob: $(inputs.prefix)*
+      glob: $(inputs.prefix).summary.txt
+  graph:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).graph
+  results:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).extraction.results
+  fasta:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).extraction.fasta                    
   sam:
     type: stdout
   error: 
