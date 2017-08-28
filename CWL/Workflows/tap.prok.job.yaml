@@ -1,10 +1,10 @@
-
+  
 reference_database:
   class: File
   path: ../Data/Inputs/DBs/silva_v128NR.341F816R.fasta
   format: fasta
 
-reference_database:
+reference_taxonomy:
   class: File
   path: ../Data/Inputs/DBs/silva_v128NR.341F816R.tax
 
