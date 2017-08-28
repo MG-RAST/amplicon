@@ -20,9 +20,6 @@ stdout: ITSx.log
 stderr: ITSx.error
 
 
-ITSx_PARMS="--complement F --cpu 4 --preserve T --only_full T q --reset "
-ITSx ${ITSx_PARMS} -i ${file} -o ${out_prefix}"
-
 inputs:
   
   input:
@@ -101,25 +98,47 @@ inputs:
         - F
     default: F
     inputBinding:
-      prefix --reset
+      prefix: --reset
       
                 
-        
-  
 arguments:   
   - prefix: --cpu
     valueFrom: $(runtime.cores)  
  
 
 outputs:
-  profiles:
+  summary:
     type: File
     outputBinding:
-      glob: $(inputs.prefix)*
-  sam:
+      glob: $(inputs.prefix).summary.txt
+  graph:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).graph
+  positions:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).positions.txt
+  undetected:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix)_no_detections.fasta           
+  full:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).full.fasta
+  ITS1:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).ITS1.fasta    
+  ITS2:
+    type: File
+    outputBinding:
+      glob: $(inputs.prefix).ITS2.fasta           
+  log:
     type: stdout
   error: 
-    type: stderr  
+    type: stderr
   
 
 $namespaces:
