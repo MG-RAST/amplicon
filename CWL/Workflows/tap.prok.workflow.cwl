@@ -77,7 +77,13 @@ inputs:
       - fasta
     default:
       class: File
-      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta     
+      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta 
+  reference_taxonomy:
+    doc: Taxonomy mapping from accession to tax string
+    type: File
+    default:
+      class: File
+      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.tax       
     
  
 
@@ -112,10 +118,13 @@ outputs:
   OTUs:
     type: File
     outputSource: [convertToOTU/otu]  
-  
   RegexpTool:
     type: File[]
     outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
+  Classified:
+    type: File[]
+    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
+  
   
 steps:
  
@@ -353,6 +362,16 @@ steps:
         valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
     out: [otu]
     
+    
+  classification:
+    label: STAGE:LAST
+    doc: s
+    run: ../Tools/mothur/classification.mothur.tool.cwl
+    in: 
+      fasta: cluster/centroidsFile
+      reference_database: reference_database
+      taxonomy_file: reference_taxonomy
+    out: [ output , error ,log , summary , taxonomy ]
     
     
  
