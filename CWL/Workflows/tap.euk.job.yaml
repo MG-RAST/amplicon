@@ -1,12 +1,12 @@
 
 reference_database:
   class: File
-  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.fasta
+  path: ../Data/Inputs/DBs/unite.v72_dynamic.ITS2.fasta
   format: fasta
 
-reference_database:
+reference_taxonomy:
   class: File
-  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.tax
+  path: ../Data/Inputs/DBs/unite.v72_dynamic.ITS2.tax
 
 primer: 
   forward: CAHCGATGAAGAACGYRG
@@ -15,11 +15,11 @@ primer:
 mate_pair:
   forward:  
     class: File
-    path: ../Data/Inputs/ Euka.forest1.R1.fastq.gz
+    path: ../Data/Inputs/Euka.forest1.R1.fastq.gz
     format: fastq.gz
   reverse:  
     class: File
-    path: ../Data/Inputs/ Euka.forest1.R2.fastq.gz
+    path: ../Data/Inputs/Euka.forest1.R2.fastq.gz
     format: fastq.gz
     
     
