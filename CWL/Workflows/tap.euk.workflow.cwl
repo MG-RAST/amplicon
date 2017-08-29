@@ -285,7 +285,7 @@ steps:
         valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta   
         default: 16s.ribosomal.feature.fasta
       profile:
-        default: ['all', 'b']
+        default: ['all']
       complement:
         default: F
       preserve:
