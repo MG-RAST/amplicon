@@ -13,25 +13,25 @@ hints:
     
 requirements:
   InlineJavascriptRequirement: {}
-  EnvVarRequirement:
-    envDef:
-      - envName: BOWTIE2_INDEXES
-        envValue: ./
-  InitialWorkDirRequirement: 
-    listing: |
-      ${
-        var list = [] ;
-         var re = new RegExp("^" + inputs.index , "i");
-         var files = inputs.indexDir.listing ;
-         for (var f in files) {
-            var file = files[f] ;
-           if ( re.test(file.basename) ){ list.push(file) }
-           else { list.push(inputs.index)}
-         }
-
-         return list;
-      }
-    
+  # EnvVarRequirement:
+#     envDef:
+#       - envName: BOWTIE2_INDEXES
+#         envValue: ./
+#   InitialWorkDirRequirement:
+#     listing: |
+#       ${
+#         var list = [] ;
+#          var re = new RegExp("^" + inputs.index , "i");
+#          var files = inputs.indexDir.listing ;
+#          for (var f in files) {
+#             var file = files[f] ;
+#            if ( re.test(file.basename) ){ list.push(file) }
+#            else { list.push(inputs.index)}
+#          }
+#
+#          return list;
+#       }
+#
  
   
 stdout: bowtie.sam
@@ -55,6 +55,7 @@ inputs:
     default: genome
     inputBinding:
       prefix: -x  
+      valueFrom: $(inputs.indexDir.path)/$(self)
   indexDir:
     type: Directory
       
