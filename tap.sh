@@ -528,7 +528,7 @@ do
 done
 
 
-exit
+
 
 ###
 # classification using mothur 
