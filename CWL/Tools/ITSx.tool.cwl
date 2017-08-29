@@ -82,7 +82,7 @@ inputs:
         - F
     default: F
     inputBinding:
-      prefix:
+      prefix: --only_full
   reset: 
     doc: |
        Re-creates the HMM-database before ITSx is run, off (F) by default
