@@ -268,7 +268,7 @@ steps:
       sizeout:
         default: true
       id: 
-        default: 0.07
+        default: 0.97
       cluster_size: dereplicate/fasta
       relable: 
         source: dereplicate/fasta
