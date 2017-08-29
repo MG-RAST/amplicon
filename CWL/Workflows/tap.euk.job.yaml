@@ -10,7 +10,7 @@ reference_taxonomy:
   
 indexDir:
   class: Directory
-  path:  ../Data/Inputs/DBs/PhiX 
+  path:  ../Data/Inputs/DBs/PhiX/ 
 
 primer: 
   forward: CAHCGATGAAGAACGYRG
