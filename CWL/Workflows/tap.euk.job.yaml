@@ -7,6 +7,10 @@ reference_database:
 reference_taxonomy:
   class: File
   path: ../Data/Inputs/DBs/unite.v72_dynamic.ITS2.tax
+  
+indexDir:
+  class: Directory
+  path:  ../Data/Inputs/DBs/PhiX 
 
 primer: 
   forward: CAHCGATGAAGAACGYRG
