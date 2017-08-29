@@ -1,0 +1,11 @@
+type: enum
+name: profile
+symbols:
+  - bacteria
+  - archaea
+  - eukaryota
+  - mitochondrial
+  - chloroplast
+  - all
+  - other
+
