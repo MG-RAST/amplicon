@@ -68,25 +68,16 @@ inputs:
           type: string
 
   indexDir:
-    type: Directory?
-    doc: Directory containing bowtie indices. Must containe index files with 'genome' prefix.
-    default: 
-      class: Directory
-      path: /usr/local/share/db/bowtie2 
+    type: Directory
+    doc: Directory containing bowtie indices. Must contain index files with 'genome' prefix.
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
     format:
       - fasta
-    default:
-      class: File
-      path: /usr/local/share/db/UNITEv6_sh_dynamic_s.fasta    
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
-    default:
-      class: File
-      path: /usr/local/share/db/UNITEv6_sh_dynamic_s.tax
  
 
 outputs:

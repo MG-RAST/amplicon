@@ -51,27 +51,18 @@ inputs:
     inputBinding:
       prefix: --un
   index: 
-    type: string?
+    type: string
     default: genome
     inputBinding:
       prefix: -x  
   indexDir:
-    type: Directory?
-    default: 
-      class: Directory
-      path: /usr/local/share/db/bowtie2     
-  
+    type: Directory
       
 baseCommand: [bowtie2]
 
 arguments:   
   - prefix: --threads 
     valueFrom: $(runtime.cores)  
- 
- 
-  
- 
-
  
 outputs:
   unaligned:
