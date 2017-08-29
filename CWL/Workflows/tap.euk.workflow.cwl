@@ -5,11 +5,14 @@ label: TAP
 doc:  
 
 requirements:
-  - class: StepInputExpressionRequirement
-  - class: InlineJavascriptRequirement
-  - class: ScatterFeatureRequirement
-  - class: MultipleInputFeatureRequirement
-  - class: SubworkflowFeatureRequirement
+  StepInputExpressionRequirement: {}
+  InlineJavascriptRequirement: {}
+  ScatterFeatureRequirement: {}
+  MultipleInputFeatureRequirement: {}
+  SubworkflowFeatureRequirement: {}
+  SchemaDefRequirement:
+    types:
+      - $import: ../Tools/ITSx-profile.yaml
 
 inputs:
   # unite:
@@ -291,8 +294,7 @@ steps:
         valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta   
         default: 16s.ribosomal.feature.fasta
       profile:
-        valueFrom: $(['all','b'])
-        # This is not working as intended 
+        default: ['all', 'b']
       complement:
         default: F
       preserve:

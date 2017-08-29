@@ -12,6 +12,9 @@ hints:
     
 requirements:
   InlineJavascriptRequirement: {}
+  SchemaDefRequirement:
+    types:
+      - $import: ITSx-profile.yaml
   
      
 baseCommand: [ITSx]
@@ -37,20 +40,11 @@ inputs:
       prefix: -o
       
   profile:
-    type:
-      type: array
-      label: Profile set to use for the search
-      items:
-        type: enum
-        name: profile_type
-        label: profile type
-        symbols: [ b, bacteria, a, archaea, e, eukaryota, m, mitochondrial, c, chloroplast, A, all, o, other ]
+    type: ITSx-profile.yaml#profile[]
+    label: Profile set to use for the search
     default: [all]
     inputBinding:
-      valueFrom: |
-        ${
-          return $self.join() ;
-        }
+      itemSeparator: ','
       prefix: -t
     
   complement:
