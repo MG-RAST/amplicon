@@ -42,6 +42,7 @@ inputs:
       label: Profile set to use for the search
       items:
         type: enum
+        name: profile_type
         label: profile type
         symbols: [ b, bacteria, a, archaea, e, eukaryota, m, mitochondrial, c, chloroplast, A, all, o, other ]
     default: [all]
