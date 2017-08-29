@@ -290,6 +290,9 @@ steps:
         source: cluster/centroidsFile
         valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta   
         default: 16s.ribosomal.feature.fasta
+      profile:
+        valueFrom: $(['all','b'])
+        # This is not working as intended 
       complement:
         default: F
       preserve:
