@@ -5,11 +5,14 @@ label: TAP
 doc:  
 
 requirements:
-  - class: StepInputExpressionRequirement
-  - class: InlineJavascriptRequirement
-  - class: ScatterFeatureRequirement
-  - class: MultipleInputFeatureRequirement
-  - class: SubworkflowFeatureRequirement
+  StepInputExpressionRequirement: {}
+  InlineJavascriptRequirement: {}
+  ScatterFeatureRequirement: {}
+  MultipleInputFeatureRequirement: {}
+  SubworkflowFeatureRequirement: {}
+  SchemaDefRequirement:
+    types:
+      - $import: ../Tools/ITSx-profile.yaml
 
 inputs:
   # unite:
@@ -65,25 +68,16 @@ inputs:
           type: string
 
   indexDir:
-    type: Directory?
-    doc: Directory containing bowtie indices. Must containe index files with 'genome' prefix.
-    default: 
-      class: Directory
-      path: /usr/local/share/db/bowtie2 
+    type: Directory
+    doc: Directory containing bowtie indices. Must contain index files with 'genome' prefix.
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
     format:
       - fasta
-    default:
-      class: File
-      path: /usr/local/share/db/UNITEv6_sh_dynamic_s.fasta    
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
-    default:
-      class: File
-      path: /usr/local/share/db/UNITEv6_sh_dynamic_s.tax
  
 
 outputs:
@@ -291,8 +285,7 @@ steps:
         valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta   
         default: 16s.ribosomal.feature.fasta
       profile:
-        valueFrom: $(['all','b'])
-        # This is not working as intended 
+        default: ['all']
       complement:
         default: F
       preserve:
