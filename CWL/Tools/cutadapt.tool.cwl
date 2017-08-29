@@ -29,50 +29,44 @@ stderr: cutadapt.error
 #            -o db/SILVA.${prok_forward}.${prok_reverse}
 
 inputs:
-  g:
+  five_prime_adapter:
     label: prok_forward
     doc: 5’ adapter 
     type: string
     inputBinding:
       prefix: -g
-  a:
+  three_prime_adapter:
     label: prok_reverse
     doc: 3’ adapter  
     type: string                        
     inputBinding:
       prefix: -a
   format:
-    label: format
-    doc:  <fasta|fastq|sra-fastq>
+    doc:  <fasta|fastq|sra-fastq>  # candidate for becoming an enum
     type: string                        
     inputBinding:
       prefix: -f    
   error:
-    label: error_rate
-    doc:  Maximum allowed error rate  
-    type: string                        
+    label:  Maximum allowed error rate  
+    type: string  # really?
     inputBinding:
       prefix: -e    
   discard-untrimmed:
-    label: discard-untrimmed
     doc: Discard reads that do not contain the adapter
     type: boolean?                        
     inputBinding:
       prefix: --discard-untrimmed
   trimmed-only:
-    label: trimmed-only
-    doc: .
+    doc: FIXME
     type: boolean?
     inputBinding:
       prefix: --trimmed-only          
   output:
-    label: output
     doc:  Write reads to OUTPUT
     type: string
     inputBinding:
       prefix: -o
   sequences:
-    label: 
     doc: input sequences
     type: File
     inputBinding:

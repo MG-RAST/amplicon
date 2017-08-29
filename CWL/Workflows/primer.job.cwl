@@ -2,7 +2,7 @@ sequences:
   class: File
   path: ../Data/Inputs/sequences.all.fasta
   # /usr/local/share/db/UNITE*.fasta
-  format: fasta
+  format: edam:format_1929  # FASTA
 
 primer: 
   eukaryote:
@@ -11,4 +11,7 @@ primer:
   prokaryote:
     forward: CCTAYGGGDBGCWSCAG
     reverse: ATTAGADACCCBNGTAGTCC      
+
+$namespaces: 
+  edam: http://edamontology.org/
 

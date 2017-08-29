@@ -5,16 +5,18 @@ label: Remove primers
 doc: remove specified primer in input sequences using cutadpt
 
 requirements:
-  - class: StepInputExpressionRequirement
-  - class: InlineJavascriptRequirement
-  - class: ScatterFeatureRequirement
-  - class: MultipleInputFeatureRequirement
+  StepInputExpressionRequirement: {}
+  InlineJavascriptRequirement: {}
+  ScatterFeatureRequirement: {}
+  MultipleInputFeatureRequirement: {}
+  SchemaDefRequirement:
+    types:
+      - $import: ../primer-pair.yml
 
 inputs:
   sequences:
     type: File
-    format:
-      - fasta
+    format: edam:formate_1929  # FASTA
   primer:
     doc: Euk and Prokaryote primer
     type:
@@ -23,24 +25,10 @@ inputs:
       fields:
         - name: eukaryote
           doc: Eukaryote primer pair
-          type:
-            type: record
-            name: direction
-            fields:
-              - name: forward
-                type: string
-              - name: reverse
-                type: string
+          type: ../primer_pair.yml#primer_pair
         - name: prokaryote
           doc: Prokaryote primer pair
-          type:
-            name: direction
-            type: record
-            fields:
-              - name: forward
-                type: string
-              - name: reverse
-                type: string
+          type: ../primer_pair.yml#primer_pair
   error:
     type: string?
     default: "0.06"
@@ -70,7 +58,7 @@ steps:
        valueFrom: ^$(self.eukaryote.forward)
      a: 
        source: primer
-       valueFrom: $(self.eukaryote.reverse + '$') 
+       valueFrom: $(self.eukaryote.reverse)'$'
      trimmed-only: 
        default: true   
      error: error

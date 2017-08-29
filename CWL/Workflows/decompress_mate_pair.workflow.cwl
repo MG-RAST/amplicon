@@ -5,21 +5,17 @@ label: Decompress
 doc: Decompress mate pair fastq files
 
 requirements:
-  - class: StepInputExpressionRequirement
-  - class: InlineJavascriptRequirement
-  - class: ScatterFeatureRequirement
-  - class: MultipleInputFeatureRequirement
+  StepInputExpressionRequirement: {}
+  InlineJavascriptRequirement: {}
+  ScatterFeatureRequirement: {}
+  MultipleInputFeatureRequirement: {}
+  SchemaDefRequirement:
+    types:
+      - $import: ../mate_pair.yml
+  
 
 inputs:
-  mate_pair:
-      type:
-        type: record
-        label: mate_pair
-        fields:
-          forward:
-            type: File
-          reverse:
-            type: File
+  mate_pair: mate_pair
   stage:
     type: string
     default: "0010"        
@@ -32,7 +28,7 @@ outputs:
     outputSource: [decompress_forward/decompressed , decompress_reverse/decompressed]
   mate_pair_decompressed: 
     outputSource: make_return/mate_pair
-    type: Any 
+    type: ../mate_pair.yml#mate_pair
    
   
 steps:
@@ -96,7 +92,7 @@ steps:
           type: File
       outputs:
         mate_pair:
-          type: Any
+          type: ../mate_paire.yml#mate_pair
       expression: |
                 ${
                   var mate_pair = {
