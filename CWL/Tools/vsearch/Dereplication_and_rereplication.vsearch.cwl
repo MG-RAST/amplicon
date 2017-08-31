@@ -128,7 +128,7 @@ outputs:
   error: 
     type: stderr
   fasta:
-    type: File?
+    type: File
     outputBinding:
       glob: $(inputs.output)
   uclust:

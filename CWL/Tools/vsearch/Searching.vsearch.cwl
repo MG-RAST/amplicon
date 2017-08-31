@@ -416,11 +416,11 @@ arguments:
         
 outputs:
   uclust:
-    type: File?
+    type: File
     outputBinding:
       glob: $(inputs.uc)
   matched_sequences:
-    type: File?
+    type: File
     outputBinding:
       glob: $(inputs.matched)
 

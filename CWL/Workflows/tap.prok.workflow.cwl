@@ -65,50 +65,39 @@ inputs:
           type: string
 
   indexDir:
-    type: Directory?
+    type: Directory
     doc: Directory containing bowtie indices. Must containe index files with 'genome' prefix.
-    default: 
-      class: Directory
-      path: /usr/local/share/db/bowtie2 
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
     format:
       - fasta
-    default:
-      class: File
-      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta 
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
-    default:
-      class: File
-      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.tax       
-    
- 
 
 outputs:
   tmp:
     type: File
-    outputSource: [prep/processed]
+    outputSource: prep/processed
   raw:
     type: Any
-    outputSource: [decompress/mate_pair_decompressed]
+    outputSource: decompress/mate_pair_decompressed
   merged:
     type: File
-    outputSource: [merging/fastq]
+    outputSource: merging/fastq
   noPHIX:
     type: File
-    outputSource: [PHIX/unaligned] 
+    outputSource: PHIX/unaligned
   noPrimer:
     type: File
-    outputSource: [removePrimer/processed]
+    outputSource: removePrimer/processed
   dereplicated:
     type: File
-    outputSource: [dereplicate/fasta]
+    outputSource: dereplicate/fasta
   clustered:
     type: File
-    outputSource: [cluster/centroidsFile]
+    outputSource: cluster/centroidsFile
   features:
     type: File[]
     outputSource: [extractFeatures/fasta, extractFeatures/results]   
@@ -117,7 +106,7 @@ outputs:
     outputSource: [cleanReads/uclust , cleanReads/matched_sequences]  
   OTUs:
     type: File
-    outputSource: [convertToOTU/otu]  
+    outputSource: convertToOTU/otu
   RegexpTool:
     type: File[]
     outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
