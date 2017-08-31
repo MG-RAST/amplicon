@@ -1078,7 +1078,7 @@ outputs:
   error: 
     type: stderr
   fastq:
-    type: File?
+    type: File
     outputBinding:    
       glob: $(inputs.fastqout)
   

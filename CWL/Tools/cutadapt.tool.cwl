@@ -31,13 +31,13 @@ stderr: cutadapt.error
 inputs:
   g:
     label: prok_forward
-    doc: 5’ adapter 
+    doc: 5' adapter 
     type: string
     inputBinding:
       prefix: -g
   a:
     label: prok_reverse
-    doc: 3’ adapter  
+    doc: 3' adapter  
     type: string                        
     inputBinding:
       prefix: -a
