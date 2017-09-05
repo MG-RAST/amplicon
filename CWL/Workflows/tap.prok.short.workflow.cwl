@@ -65,39 +65,50 @@ inputs:
           type: string
 
   indexDir:
-    type: Directory
+    type: Directory?
     doc: Directory containing bowtie indices. Must containe index files with 'genome' prefix.
+    default: 
+      class: Directory
+      path: /usr/local/share/db/bowtie2 
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
     format:
       - fasta
+    default:
+      class: File
+      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta 
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
+    default:
+      class: File
+      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.tax       
+    
+ 
 
 outputs:
-  tmp:
-    type: File
-    outputSource: prep/processed
+  # tmp:
+ #    type: File
+ #    outputSource: [prep/processed]
   raw:
     type: Any
-    outputSource: decompress/mate_pair_decompressed
+    outputSource: [decompress/mate_pair_decompressed]
   merged:
     type: File
-    outputSource: merging/fastq
+    outputSource: [merging/fastq]
   noPHIX:
     type: File
-    outputSource: PHIX/unaligned
+    outputSource: [PHIX/unaligned] 
   noPrimer:
     type: File
-    outputSource: removePrimer/processed
+    outputSource: [removePrimer/processed]
   dereplicated:
     type: File
-    outputSource: dereplicate/fasta
+    outputSource: [dereplicate/fasta]
   clustered:
     type: File
-    outputSource: cluster/centroidsFile
+    outputSource: [cluster/centroidsFile]
   features:
     type: File[]
     outputSource: [extractFeatures/fasta, extractFeatures/results]   
@@ -106,46 +117,46 @@ outputs:
     outputSource: [cleanReads/uclust , cleanReads/matched_sequences]  
   OTUs:
     type: File
-    outputSource: convertToOTU/otu
+    outputSource: [convertToOTU/otu]  
   RegexpTool:
     type: File[]
     outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
-  Classified:
-    type: File[]
-    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
-  
+  # Classified:
+ #    type: File[]
+ #    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
+ #
   
 steps:
  
   # Conditional - only run if step output does not exist
-  prep:  
-    label: STAGE:0001    
-    doc: prepare prok fasta database files and taxonomy tables
-    run: ../Tools/cutadapt.tool.cwl
-    in: 
-      sequences: 
-        source: reference_database
-        # doc: /usr/local/share/db/SILVA*.fasta
-      format:
-        source: reference_database
-        valueFrom: |
-          ${
-             return self.format.split("/").slice(-1)[0]
-            }
-      g: 
-        source: primer
-        valueFrom: $(self.forward)
-      a: 
-        source: primer
-        valueFrom: $(self.reverse)
-      error:
-        default: "0.06"
-      discard-untrimmed: 
-        default: true
-      output: 
-        source: [reference_database , primer ]
-        valueFrom: $(self[0].basename).$(self[1].forward).$(self[1].reverse)  
-    out: [processed]
+  # prep:
+ #    label: STAGE:0001
+ #    doc: prepare prok fasta database files and taxonomy tables
+ #    run: ../Tools/cutadapt.tool.cwl
+ #    in:
+ #      sequences:
+ #        source: reference_database
+ #        # doc: /usr/local/share/db/SILVA*.fasta
+ #      format:
+ #        source: reference_database
+ #        valueFrom: |
+ #          ${
+ #             return self.format.split("/").slice(-1)[0]
+ #            }
+ #      g:
+ #        source: primer
+ #        valueFrom: $(self.forward)
+ #      a:
+ #        source: primer
+ #        valueFrom: $(self.reverse)
+ #      error:
+ #        default: "0.06"
+ #      discard-untrimmed:
+ #        default: true
+ #      output:
+ #        source: [reference_database , primer ]
+ #        valueFrom: $(self[0].basename).$(self[1].forward).$(self[1].reverse)
+ #    out: [processed]
   
   decompress:
     label: STAGE:0010
@@ -352,15 +363,15 @@ steps:
     out: [otu]
     
     
-  classification:
-    label: STAGE:LAST
-    doc: s
-    run: ../Tools/mothur/classification.mothur.tool.cwl
-    in: 
-      fasta: cluster/centroidsFile
-      reference_database: reference_database
-      taxonomy_file: reference_taxonomy
-    out: [ output , error ,log , summary , taxonomy ]
+  # classification:
+ #    label: STAGE:LAST
+ #    doc: s
+ #    run: ../Tools/mothur/classification.mothur.tool.cwl
+ #    in:
+ #      fasta: cluster/centroidsFile
+ #      reference_database: reference_database
+ #      taxonomy_file: reference_taxonomy
+ #    out: [ output , error ,log , summary , taxonomy ]
     
     
  

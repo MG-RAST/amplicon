@@ -5,11 +5,14 @@ label: TAP
 doc:  
 
 requirements:
-  - class: StepInputExpressionRequirement
-  - class: InlineJavascriptRequirement
-  - class: ScatterFeatureRequirement
-  - class: MultipleInputFeatureRequirement
-  - class: SubworkflowFeatureRequirement
+  StepInputExpressionRequirement: {}
+  InlineJavascriptRequirement: {}
+  ScatterFeatureRequirement: {}
+  MultipleInputFeatureRequirement: {}
+  SubworkflowFeatureRequirement: {}
+  SchemaDefRequirement:
+    types:
+      - $import: ../Tools/ITSx-profile.yaml
 
 inputs:
   # unite:
@@ -54,7 +57,7 @@ inputs:
 #       the Prokaryote primer pair e.g. \"-g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$\"
 #       using cutadapt syntax, primers have to be anchored with ^ and $
   primer:
-    doc: Euk and Prokaryote primer
+    doc: Euk primer
     type:
       type: record
       # name: primer
@@ -66,7 +69,7 @@ inputs:
 
   indexDir:
     type: Directory
-    doc: Directory containing bowtie indices. Must containe index files with 'genome' prefix.
+    doc: Directory containing bowtie indices. Must contain index files with 'genome' prefix.
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
@@ -75,45 +78,47 @@ inputs:
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
+ 
 
 outputs:
   tmp:
     type: File
-    outputSource: prep/processed
+    outputSource: [prep/processed]
   raw:
     type: Any
-    outputSource: decompress/mate_pair_decompressed
+    outputSource: [decompress/mate_pair_decompressed]
   merged:
     type: File
-    outputSource: merging/fastq
+    outputSource: [merging/fastq]
   noPHIX:
     type: File
-    outputSource: PHIX/unaligned
+    outputSource: [PHIX/unaligned] 
   noPrimer:
     type: File
-    outputSource: removePrimer/processed
+    outputSource: [removePrimer/processed]
   dereplicated:
     type: File
-    outputSource: dereplicate/fasta
+    outputSource: [dereplicate/fasta]
   clustered:
     type: File
-    outputSource: cluster/centroidsFile
+    outputSource: [cluster/centroidsFile]
   features:
     type: File[]
-    outputSource: [extractFeatures/fasta, extractFeatures/results]   
+    outputSource: [extractFeatures/full, extractFeatures/summary]   
   cleanedReads:
     type: File[]
     outputSource: [cleanReads/uclust , cleanReads/matched_sequences]  
   OTUs:
     type: File
-    outputSource: convertToOTU/otu
+    outputSource: [convertToOTU/otu]  
+  
   RegexpTool:
     type: File[]
     outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
-  Classified:
-    type: File[]
-    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
   
+  Classified:
+    type: File
+    outputSource: [classification/summary]
   
 steps:
  
@@ -270,20 +275,26 @@ steps:
   extractFeatures:
     label: STAGE:0400
     doc: |
-       16s ribosomal feature extraction via Metaxa [PROK]
-       # ITS feature extraction via ITSx [EUK]
-    run: ../Tools/metaxa2_x.tool.cwl
+       ITS feature extraction via ITSx [EUK]
+    run: ../Tools/ITSx.tool.cwl
+  
     in:
-      profile:
-        valueFrom: $(['a','b'])
-      complement:
-        default: F
       input: cluster/centroidsFile
       prefix:
         source: cluster/centroidsFile
         valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta   
         default: 16s.ribosomal.feature.fasta
-    out: [results,fasta]
+      profile:
+        default: ['all']
+      complement:
+        default: F
+      preserve:
+        default: T
+      only_full:
+        default: T
+      reset: 
+        default: T        
+    out: [summary,full]
 
   removeCommentsAddBarcodeLabel:
     label: none
@@ -292,27 +303,22 @@ steps:
     in:
       regexp:
         default: 's/\(^.*\)|.*/\1barcodelabel=test;/g'
-        source: extractFeatures/fasta
+        source: extractFeatures/full
         valueFrom: |
             ${
                var name   = self.basename.replace(/\.?tap.*/ , "") ;
                var regexp = 's/\u005c(^.*\u005c)|.*/\u005c\u0031' + 'barcodelabel=' + name + ';/g' ;
                return regexp  ;
               }
-      input: extractFeatures/fasta
+      input: extractFeatures/full
       output:
         default: test.output.txt
-        source: extractFeatures/fasta
+        source: extractFeatures/full
         valueFrom: |
             ${
               return self.basename.replace(/\.?tap.*/ , "") + ".tap.401.fasta" ;
             }
     out: [modified,error]     
- #
- #  renameFile:
- #    label: none
- #    doc: Change filename
- #    run: ../Tools/mv/tool.cwl
  
   cleanReads:
     label: STAGE:0500
@@ -333,10 +339,10 @@ steps:
       # db: extractFeatures/fasta
       db: removeCommentsAddBarcodeLabel/modified 
       uc:
-        source: extractFeatures/fasta 
+        source: extractFeatures/full 
         valueFrom: $(self.basename.split(".")[0]).tap.0500.uc
       matched:
-        source: extractFeatures/fasta 
+        source: extractFeatures/full 
         valueFrom: $(self.basename.split(".")[0]).tap.0500.fasta
     out: [uclust , matched_sequences]
     
@@ -351,17 +357,17 @@ steps:
         valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
     out: [otu]
     
-    
   classification:
-    label: STAGE:LAST
-    doc: s
+    label: STAGE
+    doc: read classification with mothur 
     run: ../Tools/mothur/classification.mothur.tool.cwl
     in: 
       fasta: cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
     out: [ output , error ,log , summary , taxonomy ]
-    
+          
+  
     
  
       

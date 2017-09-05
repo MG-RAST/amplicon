@@ -1,0 +1,8 @@
+fastqin: 
+  class: File
+  path: ../Data/Inputs/sample.merged.fastq
+unaligned_out: sample.unaligned.fasta
+index: genome
+indexDir:
+  class: Directory
+  path: ../Data/Inputs/DBs/PhiX
