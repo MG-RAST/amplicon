@@ -145,4 +145,4 @@ COPY bin/* /usr/local/bin/
 RUN chmod 755 /usr/local/bin/*
   
 # added CWL dirs
-COPY CWL/* /CWL/
+COPY . /amplicon
