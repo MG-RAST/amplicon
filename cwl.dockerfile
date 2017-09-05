@@ -144,4 +144,5 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"  \
 COPY bin/* /usr/local/bin/
 RUN chmod 755 /usr/local/bin/*
   
-  
+# added CWL dirs
+COPY CWL/* /CWL/
