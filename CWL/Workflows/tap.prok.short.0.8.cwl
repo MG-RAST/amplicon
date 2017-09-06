@@ -41,18 +41,6 @@ inputs:
   tidy_up: 
     type: boolean
     default: False
-  # primer_euk:
-#     type: string
-#     default: -g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$
-#     doc: |
-#       the Eukaryote primer pair e.g. \"-g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$ \"
-#       using cutadapt syntax, primers have to be anchored with ^ and $
-#   primer_prok:
-#     type: string
-#     default: -g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$
-#     doc: |
-#       the Prokaryote primer pair e.g. \"-g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$\"
-#       using cutadapt syntax, primers have to be anchored with ^ and $
   primer:
     doc: Euk and Prokaryote primer
     type:
@@ -121,10 +109,10 @@ outputs:
   RegexpTool:
     type: File[]
     outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
-  # Classified:
- #    type: File[]
- #    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
- #
+  Classified:
+    type: File[]
+    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
+
   
 steps:
  
@@ -363,15 +351,15 @@ steps:
     out: [otu]
     
     
-  # classification:
- #    label: STAGE:LAST
- #    doc: s
- #    run: ../Tools/mothur/classification.mothur.tool.cwl
- #    in:
- #      fasta: cluster/centroidsFile
- #      reference_database: reference_database
- #      taxonomy_file: reference_taxonomy
- #    out: [ output , error ,log , summary , taxonomy ]
+  classification:
+    label: STAGE:LAST
+    doc: s
+    run: ../Tools/mothur/classification.mothur.tool.cwl
+    in:
+      fasta: cluster/centroidsFile
+      reference_database: reference_database
+      taxonomy_file: reference_taxonomy
+    out: [ output , error ,log , summary , taxonomy ]
     
     
  
