@@ -1,0 +1,29 @@
+  
+reference_database:
+  class: File
+  path: ../../Data/Inputs/DBs/silva_v128NR.trimmed.fasta
+  format: fasta
+
+reference_taxonomy:
+  class: File
+  path: ../../Data/Inputs/DBs/silva_v128NR.341F816R.tax
+  
+indexDir:
+  class: Directory
+  path:  ../../Data/Inputs/DBs/PhiX   
+
+primer: 
+  forward: CCTAYGGGDBGCWSCAG
+  reverse: ATTAGADACCCBNGTAGTCC    
+  
+mate_pair:
+  forward:  
+    class: File
+    path: ../../Data/Inputs/Prok.forest3.R1.fastq.gz
+    format: fastq.gz
+  reverse:  
+    class: File
+    path: ../../Data/Inputs/Prok.forest3.R2.fastq.gz
+    format: fastq.gz
+    
+
