@@ -194,7 +194,7 @@ outputs:
   error: 
     type: stderr
   centroidsFile:
-    type: File?
+    type: File
     outputBinding:
       glob: $(inputs.centroids)    
   
