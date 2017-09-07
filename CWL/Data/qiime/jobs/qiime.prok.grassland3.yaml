@@ -1,14 +1,14 @@
   
 reference_sequences:
   class: File
-  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.fasta
+  path: ../..//Inputs/DBs/silva_v128NR.341F816R.fasta
   format: fasta
 
 reference_taxonomy:
   class: File
-  path: ../Data/Inputs/DBs/SILVA_128_QIIME_release/taxonomy/taxonomy_all/99/taxonomy_all_levels.txt
+  path: ../..//Inputs/DBs/SILVA_128_QIIME_release/taxonomy/taxonomy_all/99/taxonomy_all_levels.txt
   
 sequences:
   class: File
-  path:  ../Data/Inputs/Prok.grassland3.fasta
+  path:  ../..//Inputs/Prok.grassland3.fasta
   
