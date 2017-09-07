@@ -14,6 +14,8 @@ hints:
   DockerRequirement:
     dockerPull: mgrast/qiime:0.1
 
+stdout: pick_closed_reference_otus.log
+stderr: pick_closed_reference_otus.error
 
 inputs:
   sequences:
@@ -39,27 +41,31 @@ arguments:
 
 outputs:
   otus_tree:
-    type: File
+    type: File?
     outputBinding: { glob: 97_otus.tree }
   otu_table:
-    type: File
+    type: File?
     format: edam:format_3746  # BIOM
     outputBinding: { glob: otu_table.biom }
   log:
-    type: File
+    type: File?
     outputBinding: { glob: log_*.txt }
   sequences-filtered_clusters:
-    type: File
+    type: File?
     outputBinding: { glob: uclust_ref_picked_otus/*_clusters.uc }
   sequences-filtered_failures:
-    type: File
+    type: File?
     outputBinding: { glob: uclust_ref_picked_otus/*_failures.txt }
   sequences-filtered_otus:
-    type: File
+    type: File?
     outputBinding: { glob: uclust_ref_picked_otus/*_otus.txt }
   sequences-filtered_otus_log:
-    type: File
+    type: File?
     outputBinding: { glob: uclust_ref_picked_otus/*_otus.log }
+  info:
+    type: stdout
+  error:
+    type: stderr
 
 $namespaces:
  edam: http://edamontology.org/
