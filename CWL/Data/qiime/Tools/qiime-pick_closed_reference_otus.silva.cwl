@@ -13,10 +13,10 @@ hints:
        version: [ "1.9.1" ]
 
 inputs:
- sequences:
-   type: File
-   format: edam:format_1929  # FASTA
-   inputBinding:
+  sequences:
+    type: File
+    format: edam:format_1929  # FASTA
+    inputBinding:
      prefix: --input_fp
   reference_sequences:
     type: File?
