@@ -225,7 +225,7 @@ steps:
       # threads: n/a
       sizeout: 
         default: true
-      minuniquesize:
+      maxuniquesize:
         default: 2
       derep_fulllength: removePrimer/processed
       output:
