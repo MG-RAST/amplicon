@@ -12,16 +12,9 @@ requirements:
   - class: SubworkflowFeatureRequirement
 
 inputs:
-  # unite:
-  #   type: File
-  #   format:
-  #     - fasta
-  #
-  # silva:
-  #   type: File
-  #   format:
-  #     - fasta
-   
+
+
+  # Input sequences
   mate_pair: 
     doc: List of forward and reverse compressed fastq file records
     type:
@@ -35,12 +28,14 @@ inputs:
           doc: R2.fastq.gz
           type: File
           # format: fastq.gz
+          
   ion_torrent: 
     type: boolean
     default: False
   tidy_up: 
     type: boolean
     default: False
+
   primer:
     doc: Euk and Prokaryote primer
     type:
@@ -53,72 +48,64 @@ inputs:
           type: string
 
   indexDir:
-    type: Directory?
+    type: Directory
     doc: Directory containing bowtie indices. Must containe index files with 'genome' prefix.
-    default: 
-      class: Directory
-      path: /usr/local/share/db/bowtie2 
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
     format:
       - fasta
-    default:
-      class: File
-      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta 
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
-    default:
-      class: File
-      path: /usr/local/share/db/SILVA_128_SSURef_Nr99_tax_silva_trunc.tax       
-    
- 
 
 outputs:
-  # tmp:
- #    type: File
- #    outputSource: [prep/processed]
+  # database:
+  #   type: File
+  #   outputSource: prep/processed
   raw:
     type: Any
-    outputSource: [decompress/mate_pair_decompressed]
+    outputSource: decompress/mate_pair_decompressed
   merged:
     type: File
-    outputSource: [merging/fastq]
+    outputSource: merging/fastq
   noPHIX:
     type: File
-    outputSource: [PHIX/unaligned] 
+    outputSource: PHIX/unaligned
   noPrimer:
     type: File
-    outputSource: [removePrimer/processed]
+    outputSource: removePrimer/processed
   dereplicated:
     type: File
-    outputSource: [dereplicate/fasta]
+    outputSource: dereplicate/fasta
   clustered:
     type: File
-    outputSource: [cluster/centroidsFile]
+    outputSource: cluster/centroidsFile
   features:
     type: File[]
     outputSource: [extractFeatures/fasta, extractFeatures/results]   
-  cleanedReads:
+  relabeled:
+    type: File[] 
+    outputSource: [removeCommentsAddBarcodeLabel/modified, removeCommentsAddBarcodeLabel/error] 
+  mappedReads:
     type: File[]
-    outputSource: [cleanReads/uclust , cleanReads/matched_sequences]  
+    outputSource: [mapReads/uclust , mapReads/matched_sequences]  
   OTUs:
     type: File
-    outputSource: [convertToOTU/otu]  
+    outputSource: convertToOTU/otu
   RegexpTool:
     type: File[]
     outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
   Classified:
     type: File[]
     outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
-
+  
   
 steps:
  
   # Conditional - only run if step output does not exist
   # prep:
- #    label: STAGE:0001
+ #    label: Trimm DB (cutadapt)
  #    doc: prepare prok fasta database files and taxonomy tables
  #    run: ../Tools/cutadapt.tool.cwl
  #    in:
@@ -147,8 +134,8 @@ steps:
  #    out: [processed]
   
   decompress:
-    label: STAGE:0010
-    doc: create tap input files, uncompress gzipped fastq input files and reaname them
+    label: Uncompress
+    doc: Stage 0010:create tap input files, uncompress gzipped fastq input files and reaname them
     run: ../Workflows/decompress_mate_pair.workflow.cwl
     in:
       mate_pair: mate_pair
@@ -158,8 +145,8 @@ steps:
 
 
   merging:
-    label: STAGE:0050
-    doc: Mate pair merging
+    label: Merge mate pairs (vsearch)
+    doc: Stage 0050 Mate pair merging
     run: ../Tools/vsearch.tool.cwl
     in:
       # mate_pair: mate_pair
@@ -184,8 +171,8 @@ steps:
     out: [fastq]
     
   PHIX:
-     label: STAGE:0060
-     doc: PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
+     label: PHIX (bowtie2)
+     doc: Stage 0060:\ PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
      run: ../Tools/bowtie2.tool.cwl
      in:
        fastqin: merging/fastq
@@ -200,8 +187,8 @@ steps:
      out: [unaligned]
      
   removePrimer:
-    label: STAGE:0100
-    doc: target specific primer removal using cutadpt
+    label: Remove primer (cutadapt)
+    doc: Stage 0100:\ target specific primer removal using cutadpt
     run: ../Tools/cutadapt.tool.cwl
     in:
      sequences: PHIX/unaligned
@@ -225,8 +212,8 @@ steps:
     out: [processed]
   
   dereplicate:
-    label: STAGE:0200
-    doc: dereplicating exactly identical reads 
+    label: Dereplicate (vsearch)
+    doc: Stage 0200:\ dereplicating exactly identical reads 
     run: ../Tools/vsearch/Dereplication_and_rereplication.vsearch.cwl
     in:
       # VSEARCH_GLOBAL="--threads ${THREADS}"
@@ -247,8 +234,8 @@ steps:
     out: [fasta]
     
   cluster:
-    label: STAGE:0300
-    doc: OTUclustering via vsearch
+    label: Cluster (vsearch)
+    doc: Stage 0300:\ OTUclustering via vsearch
     run: ../Tools/vsearch/Clustering.vsearch.cwl
     in:
       sizein:
@@ -267,9 +254,9 @@ steps:
     out: [centroidsFile]       
       
   extractFeatures:
-    label: STAGE:0400
+    label: Features (metaxa2_x)
     doc: |
-       16s ribosomal feature extraction via Metaxa [PROK]
+       Stage 0400:\ 16s ribosomal feature extraction via Metaxa [PROK]
        # ITS feature extraction via ITSx [EUK]
     run: ../Tools/metaxa2_x.tool.cwl
     in:
@@ -285,7 +272,7 @@ steps:
     out: [results,fasta]
 
   removeCommentsAddBarcodeLabel:
-    label: none
+    label: Relabel
     doc: regexp tool
     run: ../Tools/regexp.tool.cwl
     in:
@@ -313,9 +300,9 @@ steps:
  #    doc: Change filename
  #    run: ../Tools/mv/tool.cwl
  
-  cleanReads:
-    label: STAGE:0500
-    doc: map cleaned reads against centroid sequences
+  mapReads:
+    label: Map reads (vsearch)
+    doc: Stage 0500:\ map cleaned reads against centroid sequences
     run: ../Tools/vsearch/Searching.vsearch.cwl
     in:
       strand: 
@@ -340,22 +327,22 @@ steps:
     out: [uclust , matched_sequences]
     
   convertToOTU:
-    label: STAGE:0600
-    doc: convert .uc to .otu files
+    label: 
+    doc: Stage 0600:\ convert .uc to .otu files
     run: ../Tools/uc2otu.tool.cwl
     in:
-      input: cleanReads/uclust
+      input: mapReads/uclust
       output:
-        source: cleanReads/uclust
+        source: mapReads/uclust
         valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
     out: [otu]
     
     
   classification:
-    label: STAGE:LAST
-    doc: s
+    label: Classify cluster (mothur)
+    doc: Stage 0700:\ classify centroid sequences 
     run: ../Tools/mothur/classification.mothur.tool.cwl
-    in:
+    in: 
       fasta: cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
