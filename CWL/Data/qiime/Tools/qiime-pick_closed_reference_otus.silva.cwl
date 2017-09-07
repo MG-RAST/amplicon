@@ -11,6 +11,9 @@ hints:
      qiime:
        specs: [ "https://identifiers.org/rrid/RRID:SCR_008249" ]
        version: [ "1.9.1" ]
+  DockerRequirement:
+    dockerPull: mgrast/qiime:0.1
+
 
 inputs:
   sequences:
