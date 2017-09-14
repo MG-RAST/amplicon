@@ -49,11 +49,15 @@ mate_pair = {
     }
   }
 
+classification = {
+  'cutoff' : 60 ,
+}
 
 params = {
   'merging' : {} ,
   'dereplication': {} ,
   'clustering' : {} ,
+  'claasification' : {} 
 }
 
 
@@ -113,27 +117,29 @@ def main(args):
   
   
   cluster_id = [0.90 , 0.95 , 0.97 , 0.99]
+  classification_cutoff = [ 60 , 65 , 70 , 75 , 80 , 85 , 90]
    
   for percent_identity in cluster_id:
+    for cutoff in classification_cutoff:
+      
+      fo_json = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.json" , "w")
+      fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".job.yaml" , "w")
+      params['clustering']['percent_identity'] = str(percent_identity)
   
-    fo_json = open(opts.outdir + "/cluster-" + str(percent_identity) + ".job.json" , "w")
-    fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".job.yaml" , "w")
-    params['clustering']['percent_identity'] = str(percent_identity)
+      job = { 
+        'reference_database' : reference_database ,
+        'reference_taxonomy' : reference_taxonomy ,
+        'indexDir' : indexDir ,
+        'primer' : primer ,
+        'mate_pair' : mate_pair,
+        'pipeline_options': params
+        }
   
-    job = { 
-      'reference_database' : reference_database ,
-      'reference_taxonomy' : reference_taxonomy ,
-      'indexDir' : indexDir ,
-      'primer' : primer ,
-      'mate_pair' : mate_pair,
-      'pipeline_options': params
-      }
-  
-    fo_json.write( json.dumps(job) )
-    fo_json.close
+      fo_json.write( json.dumps(job) )
+      fo_json.close
     
-    fo_yaml.write( yaml.dump(job) )
-    fo_yaml.close
+      fo_yaml.write( yaml.dump(job) )
+      fo_yaml.close
   
 if __name__ == "__main__":
   logger.info("Starting program")
