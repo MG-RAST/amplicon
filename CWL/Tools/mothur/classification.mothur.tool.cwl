@@ -16,7 +16,7 @@ requirements:
     listing:
       - entryname: mothur.input
         entry: |       
-          classify.seqs(fasta=$(inputs.fasta.basename), template=$(inputs.reference_database.basename), taxonomy=$(inputs.taxonomy_file.basename),  cutoff=60)
+          classify.seqs(fasta=$(inputs.fasta.basename), template=$(inputs.reference_database.basename), taxonomy=$(inputs.taxonomy_file.basename),  cutoff=$(inputs.cutoff))
       - $(inputs.fasta)
       - $(inputs.reference_database)
       - $(inputs.taxonomy_file)   
@@ -40,6 +40,9 @@ inputs:
   taxonomy_file: 
     type: File
     doc:  /usr/local/share/db/UNITEv6_sh_dynamic_s.tax    
+  cutoff:
+    type: string #int
+    default: 60  
  
 arguments:
   -  mothur.input

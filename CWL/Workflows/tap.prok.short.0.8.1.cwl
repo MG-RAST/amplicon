@@ -173,25 +173,25 @@ outputs:
   clustered:
     type: File
     outputSource: cluster/centroidsFile
-  # features:
- #    type: File[]
- #    outputSource: [extractFeatures/fasta, extractFeatures/results]
- #  relabeled:
- #    type: File[]
- #    outputSource: [removeCommentsAddBarcodeLabel/modified, removeCommentsAddBarcodeLabel/error]
- #  mappedReads:
- #    type: File[]
- #    outputSource: [mapReads/uclust , mapReads/matched_sequences]
- #  OTUs:
- #    type: File
- #    outputSource: convertToOTU/otu
- #  RegexpTool:
- #    type: File[]
- #    outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
- #  Classified:
- #    type: File[]
- #    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
- #
+  features:
+    type: File[]
+    outputSource: [extractFeatures/fasta, extractFeatures/results]
+  relabeled:
+    type: File[]
+    outputSource: [removeCommentsAddBarcodeLabel/modified, removeCommentsAddBarcodeLabel/error]
+  mappedReads:
+    type: File[]
+    outputSource: [mapReads/uclust , mapReads/matched_sequences]
+  OTUs:
+    type: File
+    outputSource: convertToOTU/otu
+  RegexpTool:
+    type: File[]
+    outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
+  Classified:
+    type: File[]
+    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
+
   
 steps:
  
@@ -347,101 +347,101 @@ steps:
         valueFrom: $(self.basename.split(".")[0]).tap.0300.fasta   
     out: [centroidsFile]       
       
- #  extractFeatures:
- #    label: Features (metaxa2_x)
- #    doc: |
- #       Stage 0400:\ 16s ribosomal feature extraction via Metaxa [PROK]
- #       # ITS feature extraction via ITSx [EUK]
- #    run: ../Tools/metaxa2_x.tool.cwl
- #    in:
- #      profile:
- #        valueFrom: $(['a','b'])
- #      complement:
- #        default: F
- #      input: cluster/centroidsFile
- #      prefix:
- #        source: cluster/centroidsFile
- #        valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta
- #        default: 16s.ribosomal.feature.fasta
- #    out: [results,fasta]
+  extractFeatures:
+    label: Features (metaxa2_x)
+    doc: |
+       Stage 0400:\ 16s ribosomal feature extraction via Metaxa [PROK]
+       # ITS feature extraction via ITSx [EUK]
+    run: ../Tools/metaxa2_x.tool.cwl
+    in:
+      profile:
+        valueFrom: $(['a','b'])
+      complement:
+        default: F
+      input: cluster/centroidsFile
+      prefix:
+        source: cluster/centroidsFile
+        valueFrom: $(self.basename.split(".")[0]).tap.0400.fasta
+        default: 16s.ribosomal.feature.fasta
+    out: [results,fasta]
+
+  removeCommentsAddBarcodeLabel:
+    label: Relabel
+    doc: regexp tool
+    run: ../Tools/regexp.tool.cwl
+    in:
+      regexp:
+        default: 's/\(^.*\)|.*/\1barcodelabel=test;/g'
+        source: extractFeatures/fasta
+        valueFrom: |
+            ${
+               var name   = self.basename.replace(/\.?tap.*/ , "") ;
+               var regexp = 's/\u005c(^.*\u005c)|.*/\u005c\u0031' + 'barcodelabel=' + name + ';/g' ;
+               return regexp  ;
+              }
+      input: extractFeatures/fasta
+      output:
+        default: test.output.txt
+        source: extractFeatures/fasta
+        valueFrom: |
+            ${
+              return self.basename.replace(/\.?tap.*/ , "") + ".tap.401.fasta" ;
+            }
+    out: [modified,error]
  #
- #  removeCommentsAddBarcodeLabel:
- #    label: Relabel
- #    doc: regexp tool
- #    run: ../Tools/regexp.tool.cwl
- #    in:
- #      regexp:
- #        default: 's/\(^.*\)|.*/\1barcodelabel=test;/g'
- #        source: extractFeatures/fasta
- #        valueFrom: |
- #            ${
- #               var name   = self.basename.replace(/\.?tap.*/ , "") ;
- #               var regexp = 's/\u005c(^.*\u005c)|.*/\u005c\u0031' + 'barcodelabel=' + name + ';/g' ;
- #               return regexp  ;
- #              }
- #      input: extractFeatures/fasta
- #      output:
- #        default: test.output.txt
- #        source: extractFeatures/fasta
- #        valueFrom: |
- #            ${
- #              return self.basename.replace(/\.?tap.*/ , "") + ".tap.401.fasta" ;
- #            }
- #    out: [modified,error]
- # #
- # #  renameFile:
- # #    label: none
- # #    doc: Change filename
- # #    run: ../Tools/mv/tool.cwl
- #
- #  mapReads:
- #    label: Map reads (vsearch)
- #    doc: Stage 0500:\ map cleaned reads against centroid sequences
- #    run: ../Tools/vsearch/Searching.vsearch.cwl
- #    in:
- #      strand:
- #        default: plus
- #      reject_lower:
- #        valueFrom: ${ return 0.97 ; }
- #      maxaccepts:
- #        valueFrom: ${ return 0 ; }
- #      top_hits_only:
- #        valueFrom: ${ return true ; }
- #      maxrejects:
- #        valueFrom: ${ return 0 ; }
- #      usearch_global: cluster/centroidsFile
- #      # db: extractFeatures/fasta
- #      db: removeCommentsAddBarcodeLabel/modified
- #      uc:
- #        source: extractFeatures/fasta
- #        valueFrom: $(self.basename.split(".")[0]).tap.0500.uc
- #      matched:
- #        source: extractFeatures/fasta
- #        valueFrom: $(self.basename.split(".")[0]).tap.0500.fasta
- #    out: [uclust , matched_sequences]
- #
- #  convertToOTU:
- #    label:
- #    doc: Stage 0600:\ convert .uc to .otu files
- #    run: ../Tools/uc2otu.tool.cwl
- #    in:
- #      input: mapReads/uclust
- #      output:
- #        source: mapReads/uclust
- #        valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
- #    out: [otu]
- #
- #
- #  classification:
- #    label: Classify cluster (mothur)
- #    doc: Stage 0700:\ classify centroid sequences
- #    run: ../Tools/mothur/classification.mothur.tool.cwl
- #    in:
- #      fasta: cluster/centroidsFile
- #      reference_database: reference_database
- #      taxonomy_file: reference_taxonomy
- #    out: [ output , error ,log , summary , taxonomy ]
-    
-    
+ #  renameFile:
+ #    label: none
+ #    doc: Change filename
+ #    run: ../Tools/mv/tool.cwl
+
+  mapReads:
+    label: Map reads (vsearch)
+    doc: Stage 0500:\ map cleaned reads against centroid sequences
+    run: ../Tools/vsearch/Searching.vsearch.cwl
+    in:
+      strand:
+        default: plus
+      reject_lower:
+        valueFrom: ${ return 0.97 ; }
+      maxaccepts:
+        valueFrom: ${ return 0 ; }
+      top_hits_only:
+        valueFrom: ${ return true ; }
+      maxrejects:
+        valueFrom: ${ return 0 ; }
+      usearch_global: cluster/centroidsFile
+      # db: extractFeatures/fasta
+      db: removeCommentsAddBarcodeLabel/modified
+      uc:
+        source: extractFeatures/fasta
+        valueFrom: $(self.basename.split(".")[0]).tap.0500.uc
+      matched:
+        source: extractFeatures/fasta
+        valueFrom: $(self.basename.split(".")[0]).tap.0500.fasta
+    out: [uclust , matched_sequences]
+
+  convertToOTU:
+    label:
+    doc: Stage 0600:\ convert .uc to .otu files
+    run: ../Tools/uc2otu.tool.cwl
+    in:
+      input: mapReads/uclust
+      output:
+        source: mapReads/uclust
+        valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
+    out: [otu]
+
+
+  classification:
+    label: Classify cluster (mothur)
+    doc: Stage 0700:\ classify centroid sequences
+    run: ../Tools/mothur/classification.mothur.tool.cwl
+    in:
+      fasta: cluster/centroidsFile
+      reference_database: reference_database
+      taxonomy_file: reference_taxonomy
+    out: [ output , error ,log , summary , taxonomy ]
+
+
  
       
