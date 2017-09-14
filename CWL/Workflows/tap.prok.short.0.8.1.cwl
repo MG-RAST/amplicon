@@ -146,7 +146,14 @@ inputs:
             fields:
               - name: percent_identity
                 type: string?
-           
+        - name: classify
+          doc: classification options
+          type:
+            type: record
+            name: classification_params
+            fields:
+              - name: cutoff
+                type: string?   
 
     
 
@@ -440,6 +447,10 @@ steps:
       fasta: cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
+      cutoff: 
+        source: pipeline_options
+        default: 60
+        valueFrom: $(self.classify.cutoff)
     out: [ output , error ,log , summary , taxonomy ]
 
 

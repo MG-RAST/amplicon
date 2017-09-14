@@ -41,7 +41,7 @@ inputs:
     type: File
     doc:  /usr/local/share/db/UNITEv6_sh_dynamic_s.tax    
   cutoff:
-    type: string #int
+    type: string? #int
     default: 60  
  
 arguments:

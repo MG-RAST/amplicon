@@ -15,50 +15,6 @@ import urllib2
 
 
 
-reference_database = {
-  'class': 'File' ,
-  'path': '/amplicon/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.fasta' ,
-  'format': 'fasta'
-  }
-
-reference_taxonomy = {
-  'class': 'File' ,
-  'path': '/amplicon/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.tax'
-  }
-  
-indexDir  = {
-  'class': 'Directory',
-  'path':  '/amplicon/CWL/Data/Inputs/DBs/PhiX'
-  }
-  
-primer = {
-  'forward': 'CCTAYGGGDBGCWSCAG' ,
-  'reverse': 'ATTAGADACCCBNGTAGTCC'
-  }
-  
-mate_pair = {
-  'forward': {
-    'class': 'File',
-    'path': '/amplicon/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz',
-    'format': 'fastq.gz'
-    },
-  'reverse': {
-    'class': 'File',
-    'path': '/amplicon/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz',
-    'format': 'fastq.gz'
-    }
-  }
-
-classification = {
-  'cutoff' : 60 ,
-}
-
-params = {
-  'merging' : {} ,
-  'dereplication': {} ,
-  'clustering' : {} ,
-  'claasification' : {} 
-}
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -84,9 +40,61 @@ def main(args):
 
   parser.add_option( "--settings", dest="help", action="store_true" , default=False , help="")
   parser.add_option( "--outdir",   dest="outdir" , default="./", help="")
+  parser.add_option( "--basedir",  dest="basedir" ,default="./", help="absolute path to CWL dir")
   logger.info("Parsing options")
   (opts, args) = parser.parse_args()
   
+
+
+
+
+  reference_database = {
+    'class': 'File' ,
+    'path': opts.basedir + '/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.fasta' ,
+    'format': 'fasta'
+    }
+
+  reference_taxonomy = {
+    'class': 'File' ,
+    'path':  opts.basedir + '/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.tax'
+    }
+  
+  indexDir  = {
+    'class': 'Directory',
+    'path':  opts.basedir + '/CWL/Data/Inputs/DBs/PhiX'
+    }
+  
+  primer = {
+    'forward': 'CCTAYGGGDBGCWSCAG' ,
+    'reverse': 'ATTAGADACCCBNGTAGTCC'
+    }
+  
+  mate_pair = {
+    'forward': {
+      'class': 'File',
+      'path':  opts.basedir + '/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz',
+      'format': 'fastq.gz'
+      },
+    'reverse': {
+      'class': 'File',
+      'path':  opts.basedir + '/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz',
+      'format': 'fastq.gz'
+      }
+    }
+
+  classification = {
+    'cutoff' : 60 ,
+  }
+
+  params = {
+    'merging' : {} ,
+    'dereplication': {} ,
+    'clustering' : {} ,
+    'classify' : {} 
+  }
+  
+
+
 
   # reference_database:
  #    class: File
@@ -123,8 +131,10 @@ def main(args):
     for cutoff in classification_cutoff:
       
       fo_json = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.json" , "w")
-      fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".job.yaml" , "w")
+      fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.yaml" , "w")
+      
       params['clustering']['percent_identity'] = str(percent_identity)
+      params['classify']['cutoff'] = str(cutoff)
   
       job = { 
         'reference_database' : reference_database ,
