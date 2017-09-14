@@ -26,8 +26,8 @@ inputs:
       inputBinding:
         prefix: --iddef
 
-    id:
-      type: float?
+    percent_identity:
+      type: string? #float?
       doc: reject if identity lower, accepted values:\ 0-1.0
       inputBinding:
         prefix: --id
