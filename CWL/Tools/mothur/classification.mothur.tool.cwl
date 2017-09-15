@@ -41,8 +41,8 @@ inputs:
     type: File
     doc:  /usr/local/share/db/UNITEv6_sh_dynamic_s.tax    
   cutoff:
-    type: string? #int
-    default: 60  
+    type: string #int
+    default: "60"  
  
 arguments:
   -  mothur.input
