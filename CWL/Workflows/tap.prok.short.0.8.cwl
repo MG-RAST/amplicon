@@ -93,13 +93,14 @@ outputs:
   OTUs:
     type: File
     outputSource: convertToOTU/otu
-  RegexpTool:
-    type: File[]
-    outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
+  # RegexpTool:
+ #    type: File
+ #    outputSource: [ removeCommentsAddBarcodeLabel/modified]
+    #removeCommentsAddBarcodeLabel/error ,
   Classified:
     type: File[]
     outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
-  
+
   
 steps:
  
@@ -243,7 +244,7 @@ steps:
       sizeout:
         default: true
       id: 
-        default: 0.97
+        default: "0.97"
       cluster_size: dereplicate/fasta
       relable: 
         source: dereplicate/fasta
@@ -340,14 +341,14 @@ steps:
     
   classification:
     label: Classify cluster (mothur)
-    doc: Stage 0700:\ classify centroid sequences 
+    doc: Stage 0700:\ classify centroid sequences
     run: ../Tools/mothur/classification.mothur.tool.cwl
-    in: 
+    in:
       fasta: cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
     out: [ output , error ,log , summary , taxonomy ]
-    
-    
+ 
+
  
       
