@@ -192,9 +192,9 @@ outputs:
   OTUs:
     type: File
     outputSource: convertToOTU/otu
-  RegexpTool:
-    type: File[]
-    outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
+  # RegexpTool:
+  #   type: File[]
+  #   outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
   Classified:
     type: File[]
     outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
@@ -343,7 +343,7 @@ steps:
         default: true
       percent_identity: 
         source: pipeline_options
-        # default: 0.97
+        default: "0.97"
         valueFrom: $(self.clustering.percent_identity)
       cluster_size: dereplicate/fasta
       relabel: 
@@ -447,7 +447,7 @@ steps:
       fasta: cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
-      cutoff: 
+      cutoff:
         source: pipeline_options
         default: 60
         valueFrom: $(self.classify.cutoff)
