@@ -12,7 +12,6 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   hmmer \
   libtool \
   mafft \
-  mothur \
   ncbi-blast+  \
   node.js \
   pcregrep \
@@ -92,9 +91,9 @@ RUN cd /root \
   && yes | perl -MCPAN -e "CPAN::Shell->notest(qw!install Text::Table!)"
   
 
-# vsearch
+# vsearch 2.4.4
 RUN cd /root \
-	&& wget https://github.com/torognes/vsearch/archive/v2.4.2.tar.gz \
+	&& wget https://github.com/torognes/vsearch/archive/v2.4.4.tar.gz \
 	&& tar xzf v2*.tar.gz \
 	&& cd vsearch-2* \
 	&& ./autogen.sh \
@@ -125,6 +124,14 @@ RUN cd /root \
 #  # && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
  
  
+# mothur 1.39.5 
+RUN cd /root \
+  && wget https://github.com/mothur/mothur/releases/download/v1.39.5/Mothur.linux_64_static.zip \
+  && unzip Mothur.linux_64_static.zip \
+  && cp mothur/mothur /usr/local/bin \
+  && rm Mothur.linux_64_static.zip 
+ 
+ 
 # phix DB from Illumina
 RUN cd /root \
  && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
@@ -145,4 +152,4 @@ COPY bin/* /usr/local/bin/
 RUN chmod 755 /usr/local/bin/*
   
 # added CWL dirs
-COPY . /amplicon
+# COPY . /amplicon
