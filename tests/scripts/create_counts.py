@@ -219,7 +219,7 @@ def find(pattern, path):
 
 def export_counts(counts):
   
-  stats = open("summary.tsv" , 'w')  
+  stats = open( opts.outdir + "/summary.tsv" , 'w')  
   stats.write("\t")
    
   for stage in stages:
