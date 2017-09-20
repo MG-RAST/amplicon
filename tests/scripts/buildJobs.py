@@ -40,7 +40,8 @@ def main(args):
 
   parser.add_option( "--settings", dest="help", action="store_true" , default=False , help="")
   parser.add_option( "--outdir",   dest="outdir" , default="./", help="")
-  parser.add_option( "--basedir",  dest="basedir" ,default="./", help="absolute path to CWL dir")
+  parser.add_option( "--cwldir",  dest="cwldir" ,default="./", help="absolute path to CWL dir")
+  parser.add_option( "--datadir",  dest="datadir" ,default="./Data/Inputs/", help="absolute path to data dir")
   logger.info("Parsing options")
   (opts, args) = parser.parse_args()
   
@@ -50,18 +51,18 @@ def main(args):
 
   reference_database = {
     'class': 'File' ,
-    'path': opts.basedir + '/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.fasta' ,
+    'path': opts.cwldir + '/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.fasta' ,
     'format': 'fasta'
     }
 
   reference_taxonomy = {
     'class': 'File' ,
-    'path':  opts.basedir + '/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.tax'
+    'path':  opts.cwldir + '/CWL/Data/Inputs/DBs/silva_v128NR.341F816R.tax'
     }
   
   indexDir  = {
     'class': 'Directory',
-    'path':  opts.basedir + '/CWL/Data/Inputs/DBs/PhiX'
+    'path':  opts.cwldir + '/CWL/Data/Inputs/DBs/PhiX'
     }
   
   primer = {
@@ -72,12 +73,12 @@ def main(args):
   mate_pair = {
     'forward': {
       'class': 'File',
-      'path':  opts.basedir + '/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz',
+      'path':  opts.cwldir + '/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz',
       'format': 'fastq.gz'
       },
     'reverse': {
       'class': 'File',
-      'path':  opts.basedir + '/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz',
+      'path':  opts.cwldir + '/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz',
       'format': 'fastq.gz'
       }
     }
@@ -148,8 +149,8 @@ def main(args):
       fo_json.write( json.dumps(job) )
       fo_json.close
     
-      fo_yaml.write( yaml.dump(job) )
-      fo_yaml.close
+      # fo_yaml.write( yaml.dump(job) )
+#       fo_yaml.close
   
 if __name__ == "__main__":
   logger.info("Starting program")
