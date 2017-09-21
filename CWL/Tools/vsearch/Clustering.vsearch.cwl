@@ -27,9 +27,9 @@ inputs:
         prefix: --iddef
 
     percent_identity:
-      type: string? #float?
+      type: float?
       doc: reject if identity lower, accepted values:\ 0-1.0
-      #default: "0.97"
+      default: 0.97
       inputBinding:
         prefix: --id
 

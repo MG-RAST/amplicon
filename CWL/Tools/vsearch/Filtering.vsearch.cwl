@@ -169,10 +169,16 @@ inputs:
       doc: relabel filtered sequences with given prefix
       inputBinding:
         prefix: --relabel
+
 outputs:
 
   info:
     type: stdout
   error: 
     type: stderr  
+    
+  filtered_fastq:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.fastqout)  
   
