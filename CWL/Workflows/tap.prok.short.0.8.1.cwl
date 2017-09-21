@@ -153,7 +153,7 @@ inputs:
             name: classification_params
             fields:
               - name: cutoff
-                type: float?   
+                type: int  
 
     
 
