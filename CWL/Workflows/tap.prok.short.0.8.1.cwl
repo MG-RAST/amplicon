@@ -145,7 +145,7 @@ inputs:
             name: cluster_params
             fields:
               - name: percent_identity
-                type: string?
+                type: float?
         - name: classify
           doc: classification options
           type:
@@ -303,7 +303,7 @@ steps:
      trimmed-only: 
        default: true
      error: 
-       default: "0.06"      
+       default: 0.06   
    
      output: 
        source: PHIX/unaligned
@@ -343,7 +343,7 @@ steps:
         default: true
       percent_identity: 
         source: pipeline_options
-        default: "0.97"
+        default: 0.97
         valueFrom: $(self.clustering.percent_identity)
       cluster_size: dereplicate/fasta
       relabel: 
