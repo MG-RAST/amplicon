@@ -1,0 +1,101 @@
+cwlVersion: v1.0
+class: Workflow
+
+label: remove adapter
+doc:  remove forward and reverse primer from sequences 
+
+requirements:
+  - class: StepInputExpressionRequirement
+  - class: InlineJavascriptRequirement
+  - class: ScatterFeatureRequirement
+  - class: MultipleInputFeatureRequirement
+  - class: SubworkflowFeatureRequirement
+
+inputs:
+        
+  primer:
+    doc: Euk and Prokaryote primer
+    type:
+      type: record
+      # name: primer
+      fields:
+        - name: forward
+          type: string
+        - name: reverse
+          type: string
+
+  sequences:
+    doc: Reference database, e.g. UNITE or SILVA
+    type: File[]
+    format:
+      - fasta
+  
+  output_name:
+    type: string?
+  
+  error:
+    doc: error rate 
+    type: float?
+    default: 0.06 
+    
+outputs:
+  trimmed:
+    type: File[]
+    outputSource: [removeReversePrimer/processed]    
+
+steps:  
+  
+  removeForwardPrimer:
+    label: Remove primer (cutadapt)
+    doc: Stage 0100:\ target specific primer removal using cutadpt
+    run: ../Tools/cutadapt.tool.cwl
+    scatter: [sequences]
+    in:
+     sequences: sequences
+     format:
+       source: sequences
+       valueFrom: $(inputs.sequences.nameext.split(".").pop())
+     g:
+       source: primer
+       valueFrom: ^$(self.forward)
+     # a:
+#        source: primer
+#        valueFrom: $(self.reverse + '$')
+     trimmed-only:
+       default: true
+     error:
+       source: error
+       default: 0.06
+       
+
+     output:
+       source: sequences
+       valueFrom: $(inputs.sequences.nameroot).forward.$(inputs.sequences.nameext.split(".").pop())
+    out: [processed]
+    
+  removeReversePrimer:
+    label: Remove primer (cutadapt)
+    doc: Stage 0100:\ target specific primer removal using cutadpt
+    run: ../Tools/cutadapt.tool.cwl
+    scatter: [sequences]
+    in:
+     sequences: removeForwardPrimer/processed
+     format:
+       source: removeForwardPrimer/processed
+       valueFrom: $(inputs.sequences.nameext.split(".").pop())
+     # g:
+#        source: primer
+#        valueFrom: ^$(self.forward)
+     a:
+       source: primer
+       valueFrom: $(self.reverse + '$')
+     trimmed-only:
+       default: true
+     error:
+       source: error
+       default: 0.06
+      
+     output:
+       source: removeForwardPrimer/processed
+       valueFrom: $(inputs.sequences.nameroot).reverse.$(inputs.sequences.nameext.split(".").pop())
+    out: [processed] 
