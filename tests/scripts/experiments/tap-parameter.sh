@@ -13,7 +13,7 @@ jobdir=${amplicon_dir}/tests/experiments/parameter-tap/
 workflowdir=${amplicon_dir}/CWL/Workflows
 outdir=${amplicon_dir}/CWL/Data/Outputs/Experiment-Forest1/
 scriptdir=`dirname $0`
-container_option=''  # or '--no-container'
+container_option=$1  # or '--no-container'
 archivedir=${amplicon_dir}/archive
 
 
@@ -30,8 +30,11 @@ cd $workflowdir
 for job in ${jobdir}/*.json 
 do 
   tmp=`basename $job .job.json` 
-  echo $outdir/$tmp 
+  echo Outdir: $outdir/$tmp 
   mkdir -p $outdir/$tmp 
+  echo "cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.8.1.cwl $job \
+    1> $outdir/$tmp/receipt.json \
+    2> $outdir/$tmp/wf.error.log"
   time cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.8.1.cwl $job \
     1> $outdir/$tmp/receipt.json \
     2> $outdir/$tmp/wf.error.log
