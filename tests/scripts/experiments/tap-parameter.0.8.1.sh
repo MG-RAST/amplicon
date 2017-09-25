@@ -32,10 +32,10 @@ do
   tmp=`basename $job .job.json` 
   echo Outdir: $outdir/$tmp 
   mkdir -p $outdir/$tmp 
-  echo "cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.9.cwl $job \
+  echo "cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.8.1.cwl $job \
     1> $outdir/$tmp/receipt.json \
     2> $outdir/$tmp/wf.error.log"
-  time cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.9.cwl $job \
+  time cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.8.1.cwl $job \
     1> $outdir/$tmp/receipt.json \
     2> $outdir/$tmp/wf.error.log
 done 
