@@ -116,7 +116,7 @@ inputs:
             fields:
               - name: error
                 type: float?
-                doc: cutadap error rate  
+                doc: cutadapt error rate  
         - name: filter_reads
           doc: params for read filtering
           type:
