@@ -290,7 +290,7 @@ def main(args):
         counts[dir_name][index]={ stage['label'] : nr_entries} 
         # Count old version too (forward and reverse in one call)
         nr_entries = count_fastq(data[ out_name ][0]['path'])
-        counts[dir_name].append( { stage['label'] : nr_entries}  )
+        counts[dir_name].append( { 'remove primer - one step' : nr_entries}  )
       
       if out_name ==  "dereplicated" and data[out_name] is not None:
         nr_entries = count_fasta(data[ out_name ]['path'])
