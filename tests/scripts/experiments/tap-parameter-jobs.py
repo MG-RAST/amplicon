@@ -90,12 +90,20 @@ def main(args):
 
   params = {
     'merging' : {} ,
+    'primer_trimming' : {
+       'error': 0.06
+    } ,
+    'filter_reads' : {
+      'max_expected_error': 1
+    } ,
     'dereplication': {} ,
     'clustering' : {} ,
-    'classify' : {} 
+    'classify' : {} ,
+    'read_mapping' : {
+      'percent_identity': 0.97
+    } ,
   }
   
-
 
 
   # reference_database:
@@ -133,7 +141,7 @@ def main(args):
     for cutoff in classification_cutoff:
       
       fo_json = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.json" , "w")
-      fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.yaml" , "w")
+      # fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.yaml" , "w")
       
       params['clustering']['percent_identity'] = percent_identity
       params['classify']['cutoff'] = cutoff
