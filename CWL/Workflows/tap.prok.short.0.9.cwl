@@ -220,9 +220,9 @@ outputs:
   OTUs:
     type: File
     outputSource: convertToOTU/otu
-  RegexpTool:
-    type: File[]
-    outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
+  # RegexpTool:
+  #   type: File[]
+  #   outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
   Classified:
     type: File[]
     outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
