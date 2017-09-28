@@ -266,6 +266,11 @@ def main(args):
       stage = stages[index]
       out_name = stage['output']
       # print out_name , data[ out_name ]
+      
+      if out_name not in data :
+        logger.warning('Missing output stage ' + out_name)
+        continue
+      
       logger.info("Stage:" + out_name )
       
       if stage['output'] == "raw" and data[out_name]  is not None:
