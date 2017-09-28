@@ -248,6 +248,10 @@ def main(args):
     
     print dir_name
 
+    if  os.path.getsize(path) == 0:
+      logger.warning( "File is empty: " + path  )
+      continue
+      
     with open(path) as data_file:    
         data = json.load(data_file)
     #pprint(data)
