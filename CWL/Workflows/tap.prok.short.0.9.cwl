@@ -436,7 +436,7 @@ steps:
   convert2fasta:
     label: format conversion
     doc: Create fasta from fastq for mapping step
-    run: ../Tools/SeqUtil.tool.cwl
+    run: ../Tools/seqUtil.tool.cwl
     in:
       sequences: removeReversePrimer/processed
       output:
