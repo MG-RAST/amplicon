@@ -8,16 +8,15 @@ You need:
 - cwl-runner
 - docker
 
-To obtain docker got to https://docs.docker.com/engine/installation/[https://docs.docker.com/engine/installation/]
-
+To obtain docker got to https://docs.docker.com/engine/installation/[https://docs.docker.com/engine/installation/
 
 ## Setup and run example
 
 Clone the repository and initialize the data directory. This will download some reference databases required by some workflows.
 
 1. git clone https://github.com/MG-RAST/amplicon.git
-2. ./setup.sh
-3. cwl-runner Workflow Job
+2. #./setup.sh
+3. #cwl-runner Workflow Job
 
 
 
