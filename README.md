@@ -8,7 +8,7 @@ You need:
 - cwl-runner
 - docker
 
-To obtain docker got to https://docs.docker.com/engine/installation/ [https://docs.docker.com/engine/installation/]
+To obtain docker got to https://docs.docker.com/engine/installation/[https://docs.docker.com/engine/installation/]
 
 
 ## Setup and run example
