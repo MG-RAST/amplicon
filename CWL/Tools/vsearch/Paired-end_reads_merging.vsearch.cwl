@@ -6,6 +6,9 @@ label: Paired-end_reads_merging
 doc:  |
     Paired-end reads merging
 
+# vsearch v2.4.2_linux_x86_64, 2.0GB RAM, 2 cores
+# https://github.com/torognes/vsearch
+
 baseCommand: [vsearch]  
   
 hints:
@@ -27,13 +30,13 @@ inputs:
         prefix: --fastq_eeout
 
     fastq_minmergelen:
-      type: boolean?
+      type: int?
       doc: minimum length of entire merged sequence
       inputBinding:
         prefix: --fastq_minmergelen
 
     fastq_maxmergelen:
-      type: boolean?
+      type: int?
       doc: maximum length of entire merged sequence
       inputBinding:
         prefix: --fastq_maxmergelen
@@ -123,7 +126,7 @@ inputs:
         prefix: --fastq_mergepairs
 
     fastq_minovlen:
-      type: boolean?
+      type: int?
       doc: minimum length of overlap between reads (16)
       inputBinding:
         prefix: --fastq_minovlen
@@ -175,10 +178,72 @@ inputs:
       doc: FASTQ filename for non-merged reverse sequences
       inputBinding:
         prefix: --fastqout_notmerged_rev
+    
+    fastqout_notmerged_fwd:
+      type: string?
+      doc: FN FASTQ filename for non-merged forward sequences
+      inputBinding:
+        prefix: --fastqout_notmerged_fwd
+    fastqout_notmerged_rev:
+      type: string?
+      doc: FN FASTQ filename for non-merged reverse sequences
+         
+    relabel:
+      type: string?
+      default: "@"
+    log: 
+      type: string?
+      doc: write messages, timing and memory info to file
+      default: merged.log
+      inputBinding:
+        prefix: --log
+    report: 
+      type: string?
+      inputBinding:
+        prefix: --fastq_stats     
+    tabbedout:
+      type: string?
+      default: merged.error.stats
+      inputBinding:
+        prefix: --eetabbedout 
+    alnout:
+      type: string? 
+      default: merged.alnout
+      inputBinding: 
+        prefix: --alnout
+    
+        
 outputs:
 
   info:
     type: stdout
   error: 
     type: stderr  
-  
+  fastq:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.fastqout)
+  fastq_notmerged_fwd:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.fastqout_notmerged_fwd)
+  fastq_notmerged_rev:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.fastqout_notmerged_rev)
+  logged:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.log)  
+  tabbed:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.tabbedout)      
+  aligned:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.alnout)   
+  reported:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.report)     

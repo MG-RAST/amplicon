@@ -12,13 +12,14 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   hmmer \
   libtool \
   mafft \
-  mothur \
   ncbi-blast+  \
   node.js \
   pcregrep \
   perl \
   python \
+  python-biopython \
   python-pip \
+  python-yaml \
   unzip \
   velvet \
   wget
@@ -42,14 +43,14 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # RUN rm -f UNITE* sh*mothur*.zip
 #    # && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
  
- 
-# phix DB from Illumina
-RUN cd /root \
-   && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
-   && tar xf PhiX*Illumina*.tar.gz \
-   && mkdir -p /usr/local/share/db/bowtie2 \
-   && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2 
-   # && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
+#
+# # phix DB from Illumina
+# RUN cd /root \
+#    && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
+#    && tar xf PhiX*Illumina*.tar.gz \
+#    && mkdir -p /usr/local/share/db/bowtie2 \
+#    && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2
+#    # && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
 
 RUN cd /root \
   && wget  http://spades.bioinf.spbau.ru/release3.10.1/SPAdes-3.10.1-Linux.tar.gz \
@@ -92,9 +93,9 @@ RUN cd /root \
   && yes | perl -MCPAN -e "CPAN::Shell->notest(qw!install Text::Table!)"
   
 
-# vsearch
+# vsearch 2.4.4
 RUN cd /root \
-	&& wget https://github.com/torognes/vsearch/archive/v2.4.2.tar.gz \
+	&& wget https://github.com/torognes/vsearch/archive/v2.4.4.tar.gz \
 	&& tar xzf v2*.tar.gz \
 	&& cd vsearch-2* \
 	&& ./autogen.sh \
@@ -125,13 +126,21 @@ RUN cd /root \
 #  # && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
  
  
-# phix DB from Illumina
+# mothur 1.39.5 
 RUN cd /root \
- && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
- && tar xf PhiX*Illumina*.tar.gz \
- && mkdir -p /usr/local/share/db/bowtie2 \
- && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2 \
- && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
+  && wget https://github.com/mothur/mothur/releases/download/v1.39.5/Mothur.linux_64_static.zip \
+  && unzip Mothur.linux_64_static.zip \
+  && cp mothur/mothur /usr/local/bin \
+  && rm Mothur.linux_64_static.zip 
+ 
+ 
+# # phix DB from Illumina
+# RUN cd /root \
+#  && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
+#  && tar xf PhiX*Illumina*.tar.gz \
+#  && mkdir -p /usr/local/share/db/bowtie2 \
+#  && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2 \
+#  && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
 
 # Install CWL
 ENV LANG=C.UTF-8 LANGUAGE=C.UTF-8 LC_ALL=C.UTF-8
@@ -145,4 +154,4 @@ COPY bin/* /usr/local/bin/
 RUN chmod 755 /usr/local/bin/*
   
 # added CWL dirs
-COPY . /amplicon
+# COPY . /amplicon

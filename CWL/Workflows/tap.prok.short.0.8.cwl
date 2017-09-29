@@ -12,16 +12,9 @@ requirements:
   - class: SubworkflowFeatureRequirement
 
 inputs:
-  # unite:
-  #   type: File
-  #   format:
-  #     - fasta
-  #
-  # silva:
-  #   type: File
-  #   format:
-  #     - fasta
-   
+
+
+  # Input sequences
   mate_pair: 
     doc: List of forward and reverse compressed fastq file records
     type:
@@ -35,24 +28,14 @@ inputs:
           doc: R2.fastq.gz
           type: File
           # format: fastq.gz
+          
   ion_torrent: 
     type: boolean
     default: False
   tidy_up: 
     type: boolean
     default: False
-  # primer_euk:
-#     type: string
-#     default: -g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$
-#     doc: |
-#       the Eukaryote primer pair e.g. \"-g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$ \"
-#       using cutadapt syntax, primers have to be anchored with ^ and $
-#   primer_prok:
-#     type: string
-#     default: -g ^CCTAYGGGDBGCWSCAG -a ATTAGADACCCBNGTAGTCC$
-#     doc: |
-#       the Prokaryote primer pair e.g. \"-g ^CAHCGATGAAGAACGYRG -a GCATATCAATAAGCGSAGGA$\"
-#       using cutadapt syntax, primers have to be anchored with ^ and $
+
   primer:
     doc: Euk and Prokaryote primer
     type:
@@ -77,9 +60,9 @@ inputs:
     type: File
 
 outputs:
-  tmp:
-    type: File
-    outputSource: prep/processed
+  # database:
+  #   type: File
+  #   outputSource: prep/processed
   raw:
     type: Any
     outputSource: decompress/mate_pair_decompressed
@@ -101,55 +84,59 @@ outputs:
   features:
     type: File[]
     outputSource: [extractFeatures/fasta, extractFeatures/results]   
-  cleanedReads:
+  relabeled:
+    type: File[] 
+    outputSource: [removeCommentsAddBarcodeLabel/modified, removeCommentsAddBarcodeLabel/error] 
+  mappedReads:
     type: File[]
-    outputSource: [cleanReads/uclust , cleanReads/matched_sequences]  
+    outputSource: [mapReads/uclust , mapReads/matched_sequences]  
   OTUs:
     type: File
     outputSource: convertToOTU/otu
-  RegexpTool:
-    type: File[]
-    outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]  
+  # RegexpTool:
+ #    type: File
+ #    outputSource: [ removeCommentsAddBarcodeLabel/modified]
+    #removeCommentsAddBarcodeLabel/error ,
   Classified:
     type: File[]
     outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
-  
+
   
 steps:
  
   # Conditional - only run if step output does not exist
-  prep:  
-    label: STAGE:0001    
-    doc: prepare prok fasta database files and taxonomy tables
-    run: ../Tools/cutadapt.tool.cwl
-    in: 
-      sequences: 
-        source: reference_database
-        # doc: /usr/local/share/db/SILVA*.fasta
-      format:
-        source: reference_database
-        valueFrom: |
-          ${
-             return self.format.split("/").slice(-1)[0]
-            }
-      g: 
-        source: primer
-        valueFrom: $(self.forward)
-      a: 
-        source: primer
-        valueFrom: $(self.reverse)
-      error:
-        default: "0.06"
-      discard-untrimmed: 
-        default: true
-      output: 
-        source: [reference_database , primer ]
-        valueFrom: $(self[0].basename).$(self[1].forward).$(self[1].reverse)  
-    out: [processed]
+  # prep:
+ #    label: Trimm DB (cutadapt)
+ #    doc: prepare prok fasta database files and taxonomy tables
+ #    run: ../Tools/cutadapt.tool.cwl
+ #    in:
+ #      sequences:
+ #        source: reference_database
+ #        # doc: /usr/local/share/db/SILVA*.fasta
+ #      format:
+ #        source: reference_database
+ #        valueFrom: |
+ #          ${
+ #             return self.format.split("/").slice(-1)[0]
+ #            }
+ #      g:
+ #        source: primer
+ #        valueFrom: $(self.forward)
+ #      a:
+ #        source: primer
+ #        valueFrom: $(self.reverse)
+ #      error:
+ #        default: "0.06"
+ #      discard-untrimmed:
+ #        default: true
+ #      output:
+ #        source: [reference_database , primer ]
+ #        valueFrom: $(self[0].basename).$(self[1].forward).$(self[1].reverse)
+ #    out: [processed]
   
   decompress:
-    label: STAGE:0010
-    doc: create tap input files, uncompress gzipped fastq input files and reaname them
+    label: Uncompress
+    doc: Stage 0010:create tap input files, uncompress gzipped fastq input files and reaname them
     run: ../Workflows/decompress_mate_pair.workflow.cwl
     in:
       mate_pair: mate_pair
@@ -159,8 +146,8 @@ steps:
 
 
   merging:
-    label: STAGE:0050
-    doc: Mate pair merging
+    label: Merge mate pairs (vsearch)
+    doc: Stage 0050 Mate pair merging
     run: ../Tools/vsearch.tool.cwl
     in:
       # mate_pair: mate_pair
@@ -185,8 +172,8 @@ steps:
     out: [fastq]
     
   PHIX:
-     label: STAGE:0060
-     doc: PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
+     label: PHIX (bowtie2)
+     doc: Stage 0060:\ PHIX removal using bowtie2 with Illumina RTA genome and Illumina built indeces
      run: ../Tools/bowtie2.tool.cwl
      in:
        fastqin: merging/fastq
@@ -201,8 +188,8 @@ steps:
      out: [unaligned]
      
   removePrimer:
-    label: STAGE:0100
-    doc: target specific primer removal using cutadpt
+    label: Remove primer (cutadapt)
+    doc: Stage 0100:\ target specific primer removal using cutadpt
     run: ../Tools/cutadapt.tool.cwl
     in:
      sequences: PHIX/unaligned
@@ -226,8 +213,8 @@ steps:
     out: [processed]
   
   dereplicate:
-    label: STAGE:0200
-    doc: dereplicating exactly identical reads 
+    label: Dereplicate (vsearch)
+    doc: Stage 0200:\ dereplicating exactly identical reads 
     run: ../Tools/vsearch/Dereplication_and_rereplication.vsearch.cwl
     in:
       # VSEARCH_GLOBAL="--threads ${THREADS}"
@@ -239,7 +226,7 @@ steps:
       # threads: n/a
       sizeout: 
         default: true
-      minuniquesize:
+      maxuniquesize:
         default: 2
       derep_fulllength: removePrimer/processed
       output:
@@ -248,8 +235,8 @@ steps:
     out: [fasta]
     
   cluster:
-    label: STAGE:0300
-    doc: OTUclustering via vsearch
+    label: Cluster (vsearch)
+    doc: Stage 0300:\ OTUclustering via vsearch
     run: ../Tools/vsearch/Clustering.vsearch.cwl
     in:
       sizein:
@@ -257,7 +244,7 @@ steps:
       sizeout:
         default: true
       id: 
-        default: 0.97
+        default: "0.97"
       cluster_size: dereplicate/fasta
       relable: 
         source: dereplicate/fasta
@@ -268,9 +255,9 @@ steps:
     out: [centroidsFile]       
       
   extractFeatures:
-    label: STAGE:0400
+    label: Features (metaxa2_x)
     doc: |
-       16s ribosomal feature extraction via Metaxa [PROK]
+       Stage 0400:\ 16s ribosomal feature extraction via Metaxa [PROK]
        # ITS feature extraction via ITSx [EUK]
     run: ../Tools/metaxa2_x.tool.cwl
     in:
@@ -286,7 +273,7 @@ steps:
     out: [results,fasta]
 
   removeCommentsAddBarcodeLabel:
-    label: none
+    label: Relabel
     doc: regexp tool
     run: ../Tools/regexp.tool.cwl
     in:
@@ -314,9 +301,9 @@ steps:
  #    doc: Change filename
  #    run: ../Tools/mv/tool.cwl
  
-  cleanReads:
-    label: STAGE:0500
-    doc: map cleaned reads against centroid sequences
+  mapReads:
+    label: Map reads (vsearch)
+    doc: Stage 0500:\ map cleaned reads against centroid sequences
     run: ../Tools/vsearch/Searching.vsearch.cwl
     in:
       strand: 
@@ -341,27 +328,27 @@ steps:
     out: [uclust , matched_sequences]
     
   convertToOTU:
-    label: STAGE:0600
-    doc: convert .uc to .otu files
+    label: 
+    doc: Stage 0600:\ convert .uc to .otu files
     run: ../Tools/uc2otu.tool.cwl
     in:
-      input: cleanReads/uclust
+      input: mapReads/uclust
       output:
-        source: cleanReads/uclust
+        source: mapReads/uclust
         valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
     out: [otu]
     
     
   classification:
-    label: STAGE:LAST
-    doc: s
+    label: Classify cluster (mothur)
+    doc: Stage 0700:\ classify centroid sequences
     run: ../Tools/mothur/classification.mothur.tool.cwl
-    in: 
+    in:
       fasta: cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
     out: [ output , error ,log , summary , taxonomy ]
-    
-    
+ 
+
  
       

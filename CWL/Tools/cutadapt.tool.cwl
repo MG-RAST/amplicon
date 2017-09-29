@@ -32,13 +32,13 @@ inputs:
   g:
     label: prok_forward
     doc: 5' adapter 
-    type: string
+    type: string?
     inputBinding:
       prefix: -g
   a:
     label: prok_reverse
     doc: 3' adapter  
-    type: string                        
+    type: string?                        
     inputBinding:
       prefix: -a
   format:
@@ -50,7 +50,7 @@ inputs:
   error:
     label: error_rate
     doc:  Maximum allowed error rate  
-    type: string                        
+    type: float                        
     inputBinding:
       prefix: -e    
   discard-untrimmed:

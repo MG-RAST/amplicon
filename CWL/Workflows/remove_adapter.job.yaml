@@ -1,0 +1,14 @@
+primer: 
+  forward: CCTAYGGGDBGCWSCAG
+  reverse: ATTAGADACCCBNGTAGTCC    
+
+error: 0.06
+
+sequences:
+  - class: File
+    path: ../Data/Inputs/Prok.forest1.fasta
+    format: fasta
+  - class: File
+    path: ../Data/Inputs/Prok.forest2.fasta
+    format: fasta
+
