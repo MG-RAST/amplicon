@@ -29,13 +29,14 @@ python $scriptdir/tap-parameter-jobs.py  --outdir $jobdir --datadir $amplicon_di
 cd $workflowdir
 for job in ${jobdir}/*.json 
 do 
+  rm -rf /tmp/tap*
   tmp=`basename $job .job.json` 
   echo Outdir: $outdir/$tmp 
   mkdir -p $outdir/$tmp 
-  echo "cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.9.cwl $job \
+  echo "cwl-runner ${container_option} --tmp-outdir-prefix /tmp/tap-tmp --tmpdir-prefix /tmp/tap --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.9.cwl $job \
     1> $outdir/$tmp/receipt.json \
     2> $outdir/$tmp/wf.error.log"
-  time cwl-runner ${container_option} --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.9.cwl $job \
+  time cwl-runner ${container_option} --tmp-outdir-prefix /tmp/tap-tmp --tmpdir-prefix /tmp/tap --outdir $outdir/$tmp  ${workflowdir}/tap.prok.short.0.9.cwl $job \
     1> $outdir/$tmp/receipt.json \
     2> $outdir/$tmp/wf.error.log
 done 
