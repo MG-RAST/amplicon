@@ -116,14 +116,17 @@ def count_otus(otu_file):
   OTU = open(otu_file , 'r') 
   
   
-  regexp_match  = re.compile(r"(^[^\s]+);size=(\d+);\t+(.+)")
+  # regexp_match  = re.compile(r"(^[^\s]+);size=(\d+);\t+(.+)")
   
   for line in OTU :
       
-    m = regexp_match.match(line)
-    if m :
-      nr_otus += 1
-  
+    # m = regexp_match.match(line)
+  #   if m :
+  #     nr_otus += 1
+    nr_otus += 1
+    
+  # remove first line   
+  nr_otus = nr_otus - 1  
   logger.info("Found " + str(nr_otus) + " OTUs")
 
   return nr_otus 
@@ -318,6 +321,11 @@ def main(args):
       if out_name ==  "mappedReads" and data[out_name] is not None:
         nr_entries = count_fasta(data[ out_name ][1]['path'])
         counts[dir_name][index]={ stage['label'] : nr_entries}  
+
+      if out_name ==  "mappedReadsTest" and data[out_name] is not None:
+        nr_entries = count_fasta(data[ out_name ][1]['path'])
+        counts[dir_name].append( { 'mappedRedsTest' : nr_entries} )
+
 
       if out_name ==  "OTUs" and data[out_name] is not None:
         nr_entries = count_otus(data[ out_name ]['path'])
