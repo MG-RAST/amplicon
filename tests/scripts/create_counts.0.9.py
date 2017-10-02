@@ -286,7 +286,7 @@ def main(args):
         counts[dir_name][index]={ stage['label'] : nr_entries}
         
       if out_name ==  "noPrimer" and data[out_name] is not None:
-        nr_entries = count_fastq(data[ out_name ][2]['path'])
+        nr_entries = count_fastq(data[ out_name ][1]['path'])
         counts[dir_name][index]={ stage['label'] : nr_entries} 
         # Count old version too (forward and reverse in one call)
         nr_entries = count_fastq(data[ out_name ][0]['path'])
