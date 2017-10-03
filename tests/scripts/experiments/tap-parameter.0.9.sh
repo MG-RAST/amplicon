@@ -29,6 +29,7 @@ python $scriptdir/tap-parameter-jobs.py  --outdir $jobdir --datadir $amplicon_di
 cd $workflowdir
 for job in ${jobdir}/*.json 
 do 
+  # remove tmp dirs  
   rm -rf /tmp/tap*
   tmp=`basename $job .job.json` 
   echo Outdir: $outdir/$tmp 
