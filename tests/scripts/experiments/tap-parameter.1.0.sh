@@ -11,7 +11,7 @@
 amplicon_dir=`pwd` 
 jobdir=${amplicon_dir}/tests/experiments/parameter-tap/
 workflowdir=${amplicon_dir}/CWL/Workflows
-outdir=${amplicon_dir}/CWL/Data/Outputs/Experiment-Forest1/
+outdir=${amplicon_dir}/CWL/Data/Outputs/Experiment-Forest-Prok/
 scriptdir=`dirname $0`
 container_option=$1  # or '--no-container'
 archivedir=${amplicon_dir}/archive
