@@ -22,6 +22,9 @@ mkdir -p $jobdir
 mkdir -p $outdir
 mkdir -p $archivedir
 
+# Clean job and output dir
+rm -rf $jobdir/*
+rm -rf $outdir/*
 # Create jobs from scratch?
 # assuming data is in $amplicondir/CWL/Data/Inputs
 python $scriptdir/tap-parameter-jobs.py  --outdir $jobdir --datadir $amplicon_dir/CWL/Data/Inputs
