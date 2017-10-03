@@ -18,6 +18,7 @@ inputs:
   mate_pair: 
     doc: List of forward and reverse compressed fastq file records
     type:
+      name: mate_pair_type
       type: record
       fields:
         - name: forward
@@ -33,7 +34,7 @@ inputs:
     doc: Euk and Prokaryote primer
     type:
       type: record
-      # name: primer
+      name: primer_type
       fields:
         - name: forward
           type: string
@@ -457,10 +458,10 @@ steps:
               }
       fastq_filter: removeReversePrimer/processed
       fastqout:
-        source: removePrimer/processed
+        source: removeReversePrimer/processed
         valueFrom: $(self.basename.split(".")[0]).tap.0150.fastq
       # fastaout:
-#         source: removePrimer/processed
+#         source: removeReversePrimer/processed
 #         valueFrom: $(self.basename.split(".")[0]).tap.0150.fasta
     out: [filtered_fastq ] ###### TEST
 
@@ -477,7 +478,7 @@ steps:
 #         default: 2
       derep_fulllength: filter/filtered_fastq
       output:
-        source: removePrimer/processed
+        source: filter/filtered_fastq
         valueFrom: $(self.basename.split(".")[0]).tap.0200.fasta
     out: [fasta]
 
