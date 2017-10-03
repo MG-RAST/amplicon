@@ -192,7 +192,7 @@ outputs:
     outputSource: PHIX/unaligned
   noPrimer:
     type: File[]
-    outputSource: [removePrimer/processed , removeForwardPrimer/processed , removeReversePrimer/processed]
+    outputSource: [removeForwardPrimer/processed , removeReversePrimer/processed]
   filtered:
     type: File
     outputSource: filter/filtered_fastq  
@@ -211,18 +211,15 @@ outputs:
   mappedReads:
     type: File[]
     outputSource: [mapReads/uclust , mapReads/matched_sequences]
-  mappedReadsTest:
-    type: File[]?
-    outputSource: [mapReads_primer_test/uclust , mapReads_primer_test/matched_sequences]  
   OTUs:
     type: File
     outputSource: convertToOTU/otu
   # RegexpTool:
   #   type: File[]
   #   outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
-  # Classified:
-#     type: File[]
-#     outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
+  Classified:
+    type: File[]
+    outputSource: [ classification/output , classification/error ,classification/log , classification/summary , classification/taxonomy ]
 
 steps:
  
@@ -327,39 +324,39 @@ steps:
 
      out: [unaligned]
 
-  removePrimer:
-    label: Remove primer (cutadapt)
-    doc: Stage 0100:\ target specific primer removal using cutadpt
-    run: ../Tools/cutadapt.tool.cwl
-    in:
-     sequences: PHIX/unaligned
-     format:
-       source: PHIX/unaligned
-       valueFrom: $(self.nameext.split(".").pop())
-     g:
-       source: primer
-       valueFrom: ^$(self.forward)
-     a:
-       source: primer
-       valueFrom: $(self.reverse + '$')
-     trimmed-only:
-       default: true
-     error:
-       source: pipeline_options
-       default: "0.06"
-       valueFrom: | 
-           ${ 
-              if (self.primer_trimming.error) {
-                return self.primer_trimming.error
-              } else {
-                return 0.06
-              } 
-             }
-
-     output:
-       source: PHIX/unaligned
-       valueFrom:  $(self.basename.split(".")[0]).tap.0100.$(self.nameext.split(".").pop())
-    out: [processed]
+  # removePrimer:
+ #    label: Remove primer (cutadapt)
+ #    doc: Stage 0100:\ target specific primer removal using cutadpt
+ #    run: ../Tools/cutadapt.tool.cwl
+ #    in:
+ #     sequences: PHIX/unaligned
+ #     format:
+ #       source: PHIX/unaligned
+ #       valueFrom: $(self.nameext.split(".").pop())
+ #     g:
+ #       source: primer
+ #       valueFrom: ^$(self.forward)
+ #     a:
+ #       source: primer
+ #       valueFrom: $(self.reverse + '$')
+ #     trimmed-only:
+ #       default: true
+ #     error:
+ #       source: pipeline_options
+ #       default: "0.06"
+ #       valueFrom: |
+ #           ${
+ #              if (self.primer_trimming.error) {
+ #                return self.primer_trimming.error
+ #              } else {
+ #                return 0.06
+ #              }
+ #             }
+ #
+ #     output:
+ #       source: PHIX/unaligned
+ #       valueFrom:  $(self.basename.split(".")[0]).tap.0100.$(self.nameext.split(".").pop())
+ #    out: [processed]
 
   removeForwardPrimer:
     label: Remove primer (cutadapt)
@@ -458,7 +455,7 @@ steps:
                  return 1
                } 
               }
-      fastq_filter: removePrimer/processed
+      fastq_filter: removeReversePrimer/processed
       fastqout:
         source: removePrimer/processed
         valueFrom: $(self.basename.split(".")[0]).tap.0150.fastq
@@ -562,39 +559,7 @@ steps:
 #  #    doc: Change filename
 #  #    run: ../Tools/mv/tool.cwl
 #
-  mapReads_primer_test:
-    label: Map reads (vsearch)
-    doc: Stage 0500:\ map cleaned reads against centroid sequences
-    run: ../Tools/vsearch/Searching.vsearch.cwl
-    in:
-      strand:
-        default: plus
-      reject_lower:
-        default: 0.97
-        source: pipeline_options
-        valueFrom: |
-            ${ 
-               if (self.read_mapping.percent_identity) {
-                 return self.read_mapping.percent_identity
-               } else {
-                 return 0.97
-               } 
-              }
-      maxaccepts:
-        valueFrom: ${ return 0 ; }
-      top_hits_only:
-        valueFrom: ${ return true ; }
-      maxrejects:
-        valueFrom: ${ return 0 ; }
-      usearch_global: cluster/centroidsFile
-      db: relabel/modified
-      uc:
-        source: extractFeatures/fasta
-        valueFrom: $(self.basename.split(".")[0]).tap.0501.uc
-      matched:
-        source: extractFeatures/fasta
-        valueFrom: $(self.basename.split(".")[0]).tap.0501.fasta
-    out: [uclust , matched_sequences]
+
     
     
   mapReads:
@@ -643,16 +608,16 @@ steps:
     out: [otu]
 
 
-  # classification:
-  #   label: Classify cluster (mothur)
-  #   doc: Stage 0700:\ classify centroid sequences
-  #   run: ../Tools/mothur/classification.mothur.tool.cwl
-  #   in:
-  #     fasta: cluster/centroidsFile
-  #     reference_database: reference_database
-  #     taxonomy_file: reference_taxonomy
-  #   out: [ output , error ,log , summary , taxonomy ]
-  #
+  classification:
+    label: Classify cluster (mothur)
+    doc: Stage 0700:\ classify centroid sequences
+    run: ../Tools/mothur/classification.mothur.tool.cwl
+    in:
+      fasta: extractFeatures/fasta #cluster/centroidsFile
+      reference_database: reference_database
+      taxonomy_file: reference_taxonomy
+    out: [ output , error ,log , summary , taxonomy ]
+
     
  
       
