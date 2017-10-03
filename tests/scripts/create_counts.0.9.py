@@ -335,7 +335,7 @@ def main(args):
       if out_name ==  "Classified" and data[out_name] is not None:
         (nr_entries , nr_genera)  = count_mothur_taxonomy(data[ out_name ][4]['path'])
         counts[dir_name][index]={ stage['label'] : nr_entries}
-        counts[dir_name][index]={ "unique genera" : nr_genera}
+        counts[dir_name].append({ "unique genera" : nr_genera})
  
  
 
