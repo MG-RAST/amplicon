@@ -11,7 +11,7 @@
 amplicon_dir=`pwd` 
 jobdir=${amplicon_dir}/tests/experiments/parameter-tap/
 workflowdir=${amplicon_dir}/CWL/Workflows
-outdir=${amplicon_dir}/CWL/Data/Outputs/Experiment-Forest-Prok/
+outdir=${amplicon_dir}/CWL/Data/Outputs/Experiment-Forest-Prok-TAP-1.0/
 scriptdir=`dirname $0`
 container_option=$1  # or '--no-container'
 archivedir=${amplicon_dir}/archive
@@ -46,7 +46,7 @@ do
 done 
 
 # Create summary counts
-time python $amplicon_dir/$scriptdir/../create_counts.1.0.py --outdir ${outdir} --basedir ${outdir}  2> $outdir/error.counts.log
+time python $amplicon_dir/$scriptdir/create_counts.0.9.py --outdir ${outdir} --basedir ${outdir}  2> $outdir/error.counts.log
 
 # Archive run
 id=`date +%F-%H-%M-%S-%s` 
