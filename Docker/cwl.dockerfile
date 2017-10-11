@@ -142,12 +142,10 @@ RUN cd /root \
 #  && install -m644 /root/PhiX/Illumina/RTA/Sequence/Bowtie2Index/*  /usr/local/share/db/bowtie2 \
 #  && rm -fr  PhiX*Illumina*.tar.gz /root/PhiX
 
-# Install CWL
-ENV LANG=C.UTF-8 LANGUAGE=C.UTF-8 LC_ALL=C.UTF-8
-RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"  \
- && python get-pip.py  \
- && pip install cwlref-runner \
- && rm get-pip.py   
+
+# Upgrade pip, setuptools and wheel and install cwltool
+RUN pip install -U pip setuptools wheel
+RUN pip install cwlref-runner
 
 # install contents of bin directory in /usr/local/bin
 COPY bin/* /usr/local/bin/
