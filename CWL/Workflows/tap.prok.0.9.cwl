@@ -588,12 +588,12 @@ steps:
       maxrejects:
         valueFrom: ${ return 0 ; }
       usearch_global: convert2fasta/file
-      db: relabel/modified
+      db: relabel/modified #extractFeatures/fasta
       uc:
-        source: extractFeatures/fasta
+        source: relabel/modified #extractFeatures/fasta
         valueFrom: $(self.basename.split(".")[0]).tap.0500.uc
       matched:
-        source: extractFeatures/fasta
+        source: relabel/modified #extractFeatures/fasta
         valueFrom: $(self.basename.split(".")[0]).tap.0500.fasta
     out: [uclust , matched_sequences]
 
