@@ -9,15 +9,12 @@ hints:
   DockerRequirement:
     # dockerPull: mgrast/amplicon:1.0
     dockerPull: mgrast/qiime:1.0
-    
-requirements:
   
-stdout: pick_otus.out
-    
+stdout: pick_otus.out    
 stderr: pick_otus.error
 
 
-pick_otus.py -i $^ -o $*_uclust_picked_otus
+
 
 inputs:
   sequences:
@@ -30,7 +27,8 @@ inputs:
   
     
 arguments:
-  - -o $(runtime.tmpdir)       
+  - prefix: -o 
+    valueFrom: ./
           
 baseCommand: [pick_otus.py]
 
@@ -44,17 +42,17 @@ outputs:
     type: File
     format: uc
     outputBinding: 
-      glob: *.uc
+      glob: "*.uc"
   log:
     type: File
     format: txt
     outputBinding:
-      glob: *.log
+      glob: "*.log"
   otus:
     type: File
     format: txt
     outputBinding:
-      glob: *.txt     
+      glob: "*.txt"     
   
 
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"

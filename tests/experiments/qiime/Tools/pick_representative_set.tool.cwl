@@ -10,7 +10,6 @@ hints:
     # dockerPull: mgrast/amplicon:1.0
     dockerPull: mgrast/qiime:1.0
     
-requirements:
   
 stdout: pick_representative_set.out    
 stderr: pick_representative_set.error
@@ -34,9 +33,10 @@ inputs:
   
     
 arguments:
-  - -o representative_set.fasta       
+  - prefix: -o 
+    valueFrom: representative_set.fasta       
           
-baseCommand: [pick_representative_set.py]
+baseCommand: [pick_rep_set.py]
 
    
 outputs: 

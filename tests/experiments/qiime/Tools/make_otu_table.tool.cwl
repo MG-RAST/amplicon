@@ -10,7 +10,6 @@ hints:
     # dockerPull: mgrast/amplicon:1.0
     dockerPull: mgrast/qiime:1.0
     
-requirements:
   
 stdout: make_otu_table.out    
 stderr: make_otu_table.error
@@ -31,7 +30,8 @@ inputs:
   
     
 arguments:
-  - -o $(runtime.tmpdir)
+  - prefix: -o 
+    valueFrom: ./
           
 baseCommand: [make_otu_table.py]
 
@@ -43,14 +43,12 @@ outputs:
     type: stderr
   log:
     type: File
-    format: txt
     outputBinding: 
-      glob: $(runtime.tmpdir)/*assignments.log
-  assigmnents:
+      glob: "*assignments.log"
+  table:
     type: File
-    format: txt
     outputBinding: 
-      glob: $(runtime.tmpdir)/*assignments.txt
+      glob: "*assignments.txt"
   
   
 

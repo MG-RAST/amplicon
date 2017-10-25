@@ -28,49 +28,80 @@ inputs:
           type: File
           # format: fastq
           
-outputs:
+outputs: 
+  paired:
+    type: File
+    outputSource: [paired_end_joining/joined]
+  plain:
+    type: File
+    outputSource: [fastq_to_fasta/fasta]
+  predicted_otus:
+    type: File
+    outputSource: [pick_otus/otus] 
+  representatives_sequences:
+    type: File
+    outputSource: [pick_representative_set/representatives]
+  taxonomy:
+    type: File[]
+    outputSource: [assign_taxonomy/assignments , assign_taxonomy/log , assign_taxonomy/error]
+  otus:
+    type: File
+    outputSource: [make_otu_table/table]  
   
 steps:
   
   paired_end_joining:
     label:
     doc: 
-    run: Tools/qiime/join_paired_ends.tool.cwl
+    run: Tools/join_paired_ends.tool.cwl
     in:
-      paired_
-    out: 
+      forward:
+        source: mate_pair
+        valueFrom: $(self.forward)
+      reverse:
+        source: mate_pair
+        valueFrom: $(self.forward)
+    out: [joined]
   
   fastq_to_fasta:
     label:
-    doc: 
-    run: Tools/qiime/convert_fastaqual_fastq.tool.cwl
+    doc:
+    run: Tools/convert_fastaqual_fastq.tool.cwl
     in:
-    out:   
-    
+      sequences: paired_end_joining/joined
+
+    out: [fasta]
+ 
   pick_otus:
     label:
-    doc: 
-    run: Tools/qiime/pick_otus.tool.cwl
+    doc:
+    run: Tools/pick_otus.tool.cwl
     in:
-    out:   
-    
+      sequences: fastq_to_fasta/fasta
+    out: [otus]
+
   pick_representative_set:
     label:
-    doc: 
-    run: Tools/qiime/pick_rep_set.tool.cwl
+    doc:
+    run: Tools/pick_representative_set.tool.cwl
     in:
-    out:  
-    
-  assigne_taxonomy:
+      summary: pick_otus/otus
+      reads:  fastq_to_fasta/fasta
+    out: [representatives]
+ 
+  assign_taxonomy:
     label:
-    doc: 
-    run: Tools/qiime/assign_taxonomy.tool.cwl
+    doc:
+    run: Tools/assign_taxonomy.tool.cwl
     in:
-    out: 
-      
+      sequences: pick_representative_set/representatives
+    out: [assignments , log , error]
+ 
   make_otu_table:
     label:
-    doc: 
-    run: Tools/qiime/make_otu_table.tool.cwl
+    doc:
+    run: Tools/make_otu_table.tool.cwl
     in:
-    out: 
+      otus: pick_otus/otus
+      taxonomy: assign_taxonomy/assignments
+    out: [table]

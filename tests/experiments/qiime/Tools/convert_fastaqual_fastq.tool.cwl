@@ -10,14 +10,13 @@ hints:
     # dockerPull: mgrast/amplicon:1.0
     dockerPull: mgrast/qiime:1.0
     
-requirements:
+
   
-stdout: convert_fastaqual_fastq.out
-    
+stdout: convert_fastaqual_fastq.out    
 stderr: convert_fastaqual_fastq.error
 
 
-convert_fastaqual_fastq.py  -f $^ -c fastq_to_fastaqual
+
 
 inputs:
   sequences:
@@ -30,7 +29,8 @@ inputs:
   
     
 arguments:
-  - -c fastq_to_fastaqual       
+  - prefix: -c 
+    valueFrom: fastq_to_fastaqual       
           
 baseCommand: [convert_fastaqual_fastq.py]
 
@@ -44,12 +44,12 @@ outputs:
     type: File
     format: fasta
     outputBinding: 
-      glob: *.fna
+      glob: "*.fna"
   quality:
     type: File
     format: qualq
     outputBinding:
-      glob: *.qual   
+      glob: "*.qual"   
   
 
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"

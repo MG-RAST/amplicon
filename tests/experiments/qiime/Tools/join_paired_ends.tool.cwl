@@ -10,10 +10,8 @@ hints:
     # dockerPull: mgrast/amplicon:1.0
     dockerPull: mgrast/qiime:1.0
     
-requirements:
   
 stdout: join_paired_ends.out
-    
 stderr: join_paired_ends.error
 
 
@@ -41,7 +39,8 @@ inputs:
  #      prefix: -o  
     
 arguments:
-  - -o $(runtime.outdir)        
+  - prefix: -o 
+    valueFrom: "./"
           
 baseCommand: [join_paired_ends.py]
 
@@ -53,13 +52,12 @@ outputs:
     type: stderr
   joined:
     type: File
-    format: fasta
     outputBinding: 
-      glob: $(runtime.outdir)/fastqjoin.join.fastq
+      glob: "fastqjoin.join.fastq"
   unpaired:
     type: File[]
     outputBinding:
-      glob: $(runtime.outdir)/*.un*.fastq    
+      glob: "*.un*.fastq"    
   
 
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"

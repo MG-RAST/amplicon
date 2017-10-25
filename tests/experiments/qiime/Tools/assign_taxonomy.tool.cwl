@@ -3,14 +3,12 @@ class: CommandLineTool
 
 label: assign_taxonomy
 doc:  |
-    Decompress gz input files with gzip
+    Assign taxonomy
     
 hints:
   DockerRequirement:
     # dockerPull: mgrast/amplicon:1.0
     dockerPull: mgrast/qiime:1.0
-    
-requirements:
   
 stdout: assign_taxonomy.out    
 stderr: assign_taxonomy.error
@@ -27,7 +25,8 @@ inputs:
   
     
 arguments:
-  - -o $(runtime.tmpdir)
+  - prefix: -o 
+    valueFrom: ./
           
 baseCommand: [assign_taxonomy.py]
 
@@ -41,12 +40,12 @@ outputs:
     type: File
     format: txt
     outputBinding: 
-      glob: $(runtime.tmpdir)/*assignments.log
-  assigmnents:
+      glob: "*assignments.log"
+  assignments:
     type: File
     format: txt
     outputBinding: 
-      glob: $(runtime.tmpdir)/*assignments.txt
+      glob: "*assignments.txt"
   
   
 
