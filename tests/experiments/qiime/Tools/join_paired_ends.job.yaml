@@ -1,0 +1,8 @@
+forward:
+  class: File
+  path: /amplicon/CWL/Data/Inputs/samples_R1.fastq
+  format: fastq
+reverse:
+  class: File
+  path: /amplicon/CWL/Data/Inputs/samples_R2.fastq
+  format: fastq
