@@ -31,7 +31,7 @@ inputs:
     
 arguments:
   - prefix: -o 
-    valueFrom: ./
+    valueFrom: table.biom
           
 baseCommand: [make_otu_table.py]
 
@@ -41,14 +41,10 @@ outputs:
     type: stdout
   error: 
     type: stderr
-  log:
-    type: File
-    outputBinding: 
-      glob: "*assignments.log"
   table:
     type: File
     outputBinding: 
-      glob: "*assignments.txt"
+      glob: "table.biom"
   
   
 
