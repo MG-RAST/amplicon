@@ -1,25 +1,35 @@
 # Amplicon Pipeline
 
-## Requirements:
-
-You need:
-
-- python
-- cwl-runner
+## Requirements
 - docker
 
-To obtain docker got to https://docs.docker.com/engine/installation/[https://docs.docker.com/engine/installation/
+To obtain docker got to https://docs.docker.com/engine/installation/
 
 ## Setup and run example
 
-Clone the repository and initialize the data directory. This will download some reference databases required by some workflows.
 
 1. git clone https://github.com/MG-RAST/amplicon.git
-2. #./setup.sh
-3. #cwl-runner Workflow Job
 
+Change into cloned repository:
 
+2. cd amplicon
 
-## Building and executing your own docker container
-1. docker build -t mgrast/tap .
-2. docker run -ti mgrast/tap bash
+Download reference databases:
+
+3. ./setup.sh
+
+or from within the container
+
+docker run -v `pwd`:/amplicon -ti --rm --entrypoint bash  --workdir /amplicon mgrast/amplicon:latest setup.sh
+
+Change into the newly created Data directory:
+
+4. cd Data
+
+This will be your working directory. Copy or move your sequence files into this directory and rename them to R1.fastq.gz and R2.fastq.gz For example:
+
+5. cp your_path/ your_sequence_files.R1.fastq.gz > R1.fastq.gz
+5. cp your_path/ your_sequence_files.R2.fastq.gz > R2.fastq.gz
+
+ 
+6. docker run -v `pwd`:/Data mgrast/tap:latest 
