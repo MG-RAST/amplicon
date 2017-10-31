@@ -21,7 +21,7 @@ Download reference databases:
 
 or from within the container
 
-`docker run -v `pwd`:/amplicon -ti --rm --entrypoint bash  --workdir /amplicon mgrast/amplicon:latest setup.sh`
+```docker run -v `pwd`:/amplicon -ti --rm --entrypoint bash  --workdir /amplicon mgrast/amplicon:latest setup.sh```
 
 Change into the newly created Data directory:
 
@@ -29,8 +29,9 @@ Change into the newly created Data directory:
 
 This will be your working directory. Copy or move your sequence files into this directory and rename them to R1.fastq.gz and R2.fastq.gz For example:
 
-5. ` cp your_path/ your_sequence_files.R1.fastq.gz > R1.fastq.gz`
-5. `cp your_path/ your_sequence_files.R2.fastq.gz > R2.fastq.gz`
+5. ```cp your_path/ your_sequence_files.R1.fastq.gz > R1.fastq.gz
+      cp your_path/ your_sequence_files.R2.fastq.gz > R2.fastq.gz
+      ```
 
  
-6. `docker run -v `pwd`:/Data mgrast/tap:latest `
+6. ```docker run -v `pwd`:/Data mgrast/tap:latest ```
