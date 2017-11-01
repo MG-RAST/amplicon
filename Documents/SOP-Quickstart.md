@@ -54,10 +54,10 @@ TAP CWL Workflow
 
     ```cd Data```
     
-    This will be your working directory. Copy or move your sequence files into this directory and rename them to R1.fastq.gz and R2.fastq.gz. For example:
+    This will be your working directory. Copy or move your sequence files into this directory and rename them to **R1.fastq.gz** and **R2.fastq.gz**. For example:
 
-    -  `cp your_path/your_sequence_files.R1.fastq.gz R1.fastq.gz`
-    -  `cp your_path/your_sequence_files.R2.fastq.gz R2.fastq.gz`  
+    -  `cp *your_path/your_sequence_files.R1.fastq.gz* R1.fastq.gz`
+    -  `cp *your_path/your_sequence_files.R2.fastq.gz* R2.fastq.gz`  
 
 
 5.  ```docker run -ti --rm -v `pwd`:/Data mgrast/tap:latest prok```
