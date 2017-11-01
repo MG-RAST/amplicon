@@ -3,21 +3,13 @@
 TAP CWL Workflow
 
 
-<span class="c9">Authors</span><span class="c0">: Andreas</span>
+**Authors:** Andreas Wilke
 
-<span class="c0"></span>
+**Version:** 0.9.1
 
-<span class="c9">Version</span><span class="c0">: 0.9.1</span>
+**Audience:** This document is intended for users who are familiar with docker and amplicon data analysis.
 
-<span class="c0"></span>
-
-<span class="c9">Audience</span><span class="c0">:</span>
-
-<span>This document is intended for users who are familiar with docker and amplicon data analysis.</span>
-
-<span class="c0"></span>
-
-<span class="c9">Requirements</span><span class="c0">:</span>
+**Requirements:*
 
 *   <span class="c0">text editor</span>
 *   <span>mate pair sequence files    
