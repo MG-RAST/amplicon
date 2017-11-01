@@ -1,8 +1,7 @@
-<span class="c22">SOP - Annotating amplicon mate pairs</span>
+# SOP - Annotating amplicon mate pairs
 
-<span class="c13">TAP CWL Workflow</span>
+TAP CWL Workflow
 
-<span class="c0"></span>
 
 <span class="c9">Authors</span><span class="c0">: Andreas</span>
 
@@ -32,55 +31,43 @@
 
 *   <span class="c0">memory > 8 GB (depends on data input size and classification algorithm)</span>
 
-# <span class="c9">Introduction</span><span class="c2">:</span>
+# Introduction:
 
 <span class="c0">This SOP describes the steps necessary to run the TAP (prokaryote) pipeline.</span>
 
-# <span class="c9">SOP</span><span class="c2">:</span>
+## SOP:
 
-1.  <span class="c10">git clone</span> <span class="c10 c9 c19">[https://github.com/MG-RAST/amplicon.git](https://www.google.com/url?q=https://github.com/MG-RAST/amplicon.git&sa=D&ust=1509506961851000&usg=AFQjCNH-8W2nIvh-t27_fe4cS-XuWHTi2A)</span><span class="c10">  
-    </span>
+1.  `git clone https://github.com/MG-RAST/amplicon.git`
 2.  <span>Change into cloned repository:  
-    </span><span class="c3">cd amplicon  
+    </span><span class="c3">`cd amplicon`  
     </span>
 3.  <span>Download reference databases:  
-    </span><span class="c10">./setup.sh  
+    </span><span class="c10">`./setup.sh`  
 
     </span><span>or from within the container</span><span class="c3">  
 
-    docker run -v `pwd`:/amplicon -ti --rm --entrypoint bash  --workdir /amplicon mgrast/amplicon:latest setup.sh</span>
+    ```docker run -v `pwd`:/amplicon -ti --rm --entrypoint bash  --workdir /amplicon mgrast/amplicon:latest setup.sh```</span>
 
 <span class="c0"></span>
 
-1.  <span>Change into the newly created Data directory:  
+4.  <span>Change into the newly created Data directory:  
 
-    </span><span class="c10">cd Data</span><span>This will be your working directory. Copy or move your sequence files into this directory and</span> <span class="c12">rename</span><span> them to</span> <span class="c12">R1.fastq.gz</span><span> and</span> <span class="c12">R2.fastq.gz .</span> <span class="c0">For example:</span>
+    </span><span class="c10">`cd Data`</span><span>This will be your working directory. Copy or move your sequence files into this directory and</span> <span class="c12">rename</span><span> them to</span> <span class="c12">R1.fastq.gz</span><span> and</span> <span class="c12">R2.fastq.gz .</span> <span class="c0">For example:</span>
 
-1.  <span class="c10">cp</span> <span class="c1">your_path/</span><span class="c12"> your_sequence_files.R1.fastq.gz</span> <span class="c3">> R1.fastq.gz</span>
-2.  <span class="c10">cp</span> <span class="c1">your_path/</span><span class="c12"> your_sequence_files.R2.fastq.gz</span> <span class="c3">> R2.fastq.gz  
-    </span>
+    -  `cp your_path/your_sequence_files.R1.fastq.gz R1.fastq.gz`
+    -  `cp your_path/your_sequence_files.R2.fastq.gz R2.fastq.gz`  
 
-1.  <span class="c3">docker run -ti --rm -v `pwd`:/Data mgrast/tap:latest prok</span>
 
-<span class="c3"></span>
+5.  ```docker run -ti --rm -v `pwd`:/Data mgrast/tap:latest prok```
 
-<span class="c3"></span>
 
-<span class="c3"></span>
-
-<span class="c3"></span>
-
-<span class="c3"></span>
 
 * * *
 
-<span class="c3"></span>
 
-<span class="c3"></span>
+##Notes:
 
-<span class="c12 c16">Notes:</span>
 
-<span class="c3"></span>
 
 *   <span>To get help:  
     </span><span class="c3">  
@@ -89,6 +76,3 @@
 *   <span>Run any command in container:  
     </span><span class="c10">docker run -ti --rm -v `pwd`:/Data mgrast/tap:latest</span> <span class="c1 c18">COMMAND</span>
 
-<span class="c3"></span>
-
-<span class="c3"></span>
