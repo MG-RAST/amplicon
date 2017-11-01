@@ -48,11 +48,13 @@ TAP CWL Workflow
 
     ```docker run -v `pwd`:/amplicon -ti --rm --entrypoint bash  --workdir /amplicon mgrast/amplicon:latest setup.sh```</span>
 
-<span class="c0"></span>
 
-4.  <span>Change into the newly created Data directory:  
 
-    </span><span class="c10">`cd Data`</span><span>This will be your working directory. Copy or move your sequence files into this directory and</span> <span class="c12">rename</span><span> them to</span> <span class="c12">R1.fastq.gz</span><span> and</span> <span class="c12">R2.fastq.gz .</span> <span class="c0">For example:</span>
+4.  Change into the newly created Data directory:  
+
+    ```cd Data```
+    
+    This will be your working directory. Copy or move your sequence files into this directory and rename them to R1.fastq.gz and R2.fastq.gz. For example:
 
     -  `cp your_path/your_sequence_files.R1.fastq.gz R1.fastq.gz`
     -  `cp your_path/your_sequence_files.R2.fastq.gz R2.fastq.gz`  
