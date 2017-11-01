@@ -9,7 +9,7 @@ TAP CWL Workflow
 
 **Audience:** This document is intended for users who are familiar with docker and amplicon data analysis.
 
-**Requirements:*
+**Requirements:**
 
 *   <span class="c0">text editor</span>
 *   <span>mate pair sequence files    
@@ -19,11 +19,11 @@ TAP CWL Workflow
 
 <span class="c0"></span>
 
-<span class="c9">Known limitations</span><span>:</span><span class="c0"> </span>
+**Known limitations:**
 
 *   <span class="c0">memory > 8 GB (depends on data input size and classification algorithm)</span>
 
-# Introduction:
+## Introduction:
 
 <span class="c0">This SOP describes the steps necessary to run the TAP (prokaryote) pipeline.</span>
 
