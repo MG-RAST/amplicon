@@ -52,7 +52,8 @@ steps:
                if (!self.forward.basename.match(/\.tap\./) ) {
                    var prefix = self.forward.basename;
                    prefix = prefix.replace( /\.fastq.gz$/ , '');
-                   return prefix + ".tap." + inputs.stage + ".fastq";
+                   prefix = prefix.replace(/\./ , "_") ;
+                   return prefix + ".tap." + "001" + ".fastq";
                } else if (self.forward.basename.match(/\.gz$/) ) {
                    return self.forward.basename.replace(/\.gz$/ , '') ;
                } else {
@@ -76,7 +77,8 @@ steps:
              if (!self.reverse.basename.match(/\.tap\./) ) {
                  var prefix = self.reverse.basename;
                  prefix = prefix.replace( /\.fastq.gz$/ , '');
-                 return prefix + ".tap." + inputs.stage + ".fastq";
+                 prefix = prefix.replace(/\./ , "_") ;
+                 return prefix + ".tap." + "001" + ".fastq";
              } else if (self.reverse.basename.match(/\.gz$/) ) {
                  return self.reverse.basename.replace(/\.gz$/ , '') ;
              } else {
