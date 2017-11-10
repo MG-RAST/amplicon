@@ -609,6 +609,17 @@ steps:
     out: [otu]
 
 
+  # classification:
+ #    label: Classify cluster (mothur)
+ #    doc: Stage 0700:\ classify centroid sequences
+ #    run: ../Tools/mothur/classification.mothur.tool.cwl
+ #    in:
+ #      fasta: extractFeatures/fasta #cluster/centroidsFile
+ #      reference_database: reference_database
+ #      taxonomy_file: reference_taxonomy
+ #    out: [ output , error ,log , summary , taxonomy ]
+
+    
   classification:
     label: Classify cluster (mothur)
     doc: Stage 0700:\ classify centroid sequences
@@ -617,8 +628,11 @@ steps:
       fasta: extractFeatures/fasta #cluster/centroidsFile
       reference_database: reference_database
       taxonomy_file: reference_taxonomy
+      cutoff:
+        source: pipeline_options
+        default: 60
+        valueFrom: $(self.classify.cutoff)
     out: [ output , error ,log , summary , taxonomy ]
-
-    
  
+
       
