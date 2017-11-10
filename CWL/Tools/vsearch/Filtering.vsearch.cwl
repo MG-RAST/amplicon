@@ -182,3 +182,7 @@ outputs:
     outputBinding:    
       glob: $(inputs.fastqout)  
   
+  filtered_fasta:
+    type: File?
+    outputBinding:    
+      glob: $(inputs.fastaout)
