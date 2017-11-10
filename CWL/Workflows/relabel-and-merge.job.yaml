@@ -1,0 +1,18 @@
+  
+sequence_files:
+  # - class: File
+  #   path: /Data/Prok_forest1.tap.0102.fastq
+  #   format: fasta
+  # - class: File
+  #   path: /Data/Prok_forest2.tap.0102.fastq
+  #   format: fasta
+  - class: File
+    path: /Data/sample1.test.fasta
+    format: fasta
+  - class: File
+    path: /Data/sample2.test.fasta
+    format: fasta  
+  
+  
+    
+

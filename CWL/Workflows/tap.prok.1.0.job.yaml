@@ -1,0 +1,70 @@
+  
+reference_database:
+  class: File
+  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.fasta
+  format: fasta
+
+reference_taxonomy:
+  class: File
+  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.tax
+  
+indexDir:
+  class: Directory
+  path:  ../Data/Inputs/DBs/PhiX   
+
+primer: 
+  forward: CCTAYGGGDBGCWSCAG
+  reverse: ATTAGADACCCBNGTAGTCC    
+  
+mate_pairs:
+  - forward:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz
+      format: fastq.gz
+    reverse:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz
+      format: fastq.gz
+  - forward:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest2.R1.fastq.gz
+      format: fastq.gz
+    reverse:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest2.R2.fastq.gz
+      format: fastq.gz    
+    
+   
+pipeline_options:
+  merging: 
+    fastq_maxdiffs: 30
+    fastq_minovlen: 30
+    fastq_minmergelen: 300
+  primer_trimming: 
+    error: 0.06
+  filter_reads: 
+    max_expected_error: 1
+  classify: {cutoff: 90 }
+  clustering: 
+    percent_identity: 0.97 
+  read_mapping: 
+    percent_identity: 0.97 
+  dereplication: {}  
+      
+
+   
+    
+# euka_forward: "CAHCGATGAAGAACGYRG"
+# euka_reverse: "GCATATCAATAAGCGSAGGA" 
+# euka_sequences:
+#   class: File
+#   path: ../Data/Inputs/sequences.all.fasta
+#   # /usr/local/share/db/UNITE*.fasta
+#   format: fasta
+# prok_forward: "CCTAYGGGDBGCWSCAG"
+# prok_reverse: "ATTAGADACCCBNGTAGTCC"
+# prok_sequences:
+#   class: File
+#   path: ../Data/Inputs/sequences.all.fasta
+#   # /usr/local/share/db/SILVA*.fasta
+#   format: fasta
