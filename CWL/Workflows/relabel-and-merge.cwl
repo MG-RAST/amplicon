@@ -16,7 +16,7 @@ inputs:
     format: fasta
     
 outputs:
- concatinated:
+ concatenated:
    type: File
    outputSource: concatenate/concatenated
  
@@ -43,7 +43,7 @@ steps:
         default: test.output.txt
         valueFrom: |
             ${
-              return inputs.input.basename.replace(/\.?tap.*/ , "") + ".tap.merged.fasta" ;
+              return inputs.input.basename.replace(/\.?tap.*/ , "") + ".tap.relabeled.fasta" ;
             }
     out: [modified]
     
@@ -53,10 +53,10 @@ steps:
     run:
       class:  CommandLineTool
       stdout: |
-          { 
-            time= new Date().valueOf() 
-            return 'merged.' + time + .fasta'
-          }  
+            ${ 
+              var time = new Date().valueOf() ;
+              return 'merged.' + time + '.fasta' ;
+            }  
       inputs:
         files:
           type: File[]
@@ -64,7 +64,11 @@ steps:
             position: 1
       outputs:
         concatenated: 
-          type: stdout
+          type: File
+          format: fasta
+          outputBinding: 
+            glob: merged.*.fasta
+          # type: stdout
       baseCommand: [cat] 
     in: 
       files: relabel/modified
