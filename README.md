@@ -38,5 +38,5 @@ This will be your working directory. Copy or move your sequence files into this 
 
 ## Pipeline
 
-![alt text](images/TAP-Workflow-1.0.png "Title")
-![alt text](images/TAP-Workflow-1.0.svg "Title SVG")
+
+![TAP Workflow Overview](images/TAP-Workflow-1.0.svg "Workflow steps")
