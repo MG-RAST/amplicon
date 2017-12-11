@@ -1,3 +1,5 @@
 # ignore CWL Data directory
 CWL/Data/*
 archive/*
+tmp
+CWL/Workflows/tmp/*
