@@ -207,7 +207,7 @@ outputs:
       items: 
         type: array
         items: File
-    outputSource: [merge-mate-pairs/error , merge-mate-pairs/info ,  merge-mate-pairs/fastq , merge-mate-pairs/logged , merge-mate-pairs/tabbed, merge-mate-pairs/aligned , merge-mate-pairs/fastq_notmerged_fwd , merge-mate-pairs/fastq_notmerged_rev]
+    outputSource: [merge_mate_pairs/error , merge_mate_pairs/info ,  merge_mate_pairs/fastq , merge_mate_pairs/logged , merge_mate_pairs/tabbed, merge_mate_pairs/aligned , merge_mate_pairs/fastq_notmerged_fwd , merge_mate_pairs/fastq_notmerged_rev]
   noPHIX:
     type: File[]
     outputSource: PHIX/unaligned
@@ -218,13 +218,17 @@ outputs:
         - type: array
           items: File
     outputSource: [removeForwardPrimer/processed , removeReversePrimer/processed]
+  
+  merged-samples:
+    type: File
+    outputSource: [merge_samples/concatenated]
   filtered:
     type: File[]
     outputSource: [filter/filtered_fasta]
   filtered-and-merged:
     type: File
-    outputSource: [relabel-and-merge-filtered/concatenated]
-      
+    outputSource: [relabel_and_merge_filtered/concatenated]
+    
   dereplicated:
     type: File
     outputSource: dereplicate/fasta
@@ -240,9 +244,12 @@ outputs:
   mappedReads:
     type: File[]
     outputSource: [mapReads/uclust , mapReads/matched_sequences]
-  OTUs:
-    type: File
-    outputSource: convertToOTU/otu
+  mapped-otus:
+    type: File[]
+    outputSource: [mapReads/otus]  
+  # OTUs:
+  #   type: File
+  #   outputSource: [convertToOTU/otu]
   # RegexpTool:
   #   type: File[]
   #   outputSource: [removeCommentsAddBarcodeLabel/error , removeCommentsAddBarcodeLabel/modified]
@@ -261,7 +268,7 @@ steps:
       mate_pair: mate_pairs
     out: [mate_pair_decompressed]
 
-  merge-mate-pairs:
+  merge_mate_pairs:
     label: merge PE reads
     doc: Stage 0050 Mate pair merging
     run: ../Tools/vsearch/Paired-end_reads_merging.vsearch.cwl
@@ -279,8 +286,8 @@ steps:
         default: 30
         valueFrom: |
             ${
-               if (self.merge-mate-pairs.fastq_maxdiffs) {
-                 return self.merge-mate-pairs.fastq_maxdiffs
+               if (self.merging.fastq_maxdiffs) {
+                 return self.merging.fastq_maxdiffs
                } else {
                  return 30
                }
@@ -290,8 +297,8 @@ steps:
         source: pipeline_options
         valueFrom: |
             ${
-               if (self.merge-mate-pairs.fastq_minovlen) {
-                 return self.merge-mate-pairs.fastq_minovlen
+               if (self.merging.fastq_minovlen) {
+                 return self.merging.fastq_minovlen
                } else {
                  return 30
                }
@@ -301,8 +308,8 @@ steps:
         source: pipeline_options
         valueFrom: |
             ${
-               if (self.merge-mate-pairs.fastq_minmergelen) {
-                 return self.merge-mate-pairs.fastq_minmergelen
+               if (self.merging.fastq_minmergelen) {
+                 return self.merging.fastq_minmergelen
                } else {
                  return 300
                }
@@ -338,9 +345,9 @@ steps:
      scatter: [fastqin,unaligned_out]
      scatterMethod: dotproduct
      in:
-       fastqin: [merge-mate-pairs/fastq]
+       fastqin: [merge_mate_pairs/fastq]
        unaligned_out:
-         source: [merge-mate-pairs/fastq]
+         source: [merge_mate_pairs/fastq]
          valueFrom:  $(self.basename.split(".")[0]).tap.0060.fastq
                      # self.split("/").slice(-1)[0]
        index:
@@ -437,7 +444,7 @@ steps:
         default: true
     out: [file]
 
-  merge-samples:
+  merge_samples:
     label: Merge samples
     doc: Adding sample name to fasta sequence headers and merging all fasta files into one single file
     run: ../Workflows/relabel-and-merge.cwl
@@ -477,7 +484,7 @@ steps:
     out: [filtered_fasta ] ###### TEST
 
 
-  relabel-and-merge-filtered:
+  relabel_and_merge_filtered:
     label: Merge samples
     doc: Adding sample name to fasta sequence headers and merging all fasta files into one single file
     run: ../Workflows/relabel-and-merge.cwl
@@ -495,14 +502,14 @@ steps:
     run: ../Tools/vsearch/Dereplication_and_rereplication.vsearch.cwl
     in:
       relabel:
-        default: Uniq
+        default: Unique
       sizeout:
         default: true
       # maxuniquesize:
 #         default: 2
-      derep_fulllength: relabel-and-merge-filtered/concatenated
+      derep_fulllength: relabel_and_merge_filtered/concatenated
       output:
-        source: relabel-and-merge-filtered/concatenated
+        source: relabel_and_merge_filtered/concatenated
         valueFrom: $(self.basename.split(".")[0]).tap.0200.fasta
     out: [fasta]
 
@@ -611,7 +618,9 @@ steps:
         valueFrom: ${ return true ; }
       maxrejects:
         valueFrom: ${ return 0 ; }
-      usearch_global: merge-samples/concatenated
+      notrunclabels:
+        valueFrom: ${ return true ; }
+      usearch_global: merge_samples/concatenated
       db: extractFeatures/fasta
       uc:
         source: extractFeatures/fasta
@@ -619,18 +628,27 @@ steps:
       matched:
         source: extractFeatures/fasta
         valueFrom: $(self.basename.split(".")[0]).tap.0500.fasta
-    out: [uclust , matched_sequences]
+      biomout:
+        source: extractFeatures/fasta
+        valueFrom: $(self.basename.split(".")[0]).tap.0500.biom.otu
+      otutabout:
+        source: extractFeatures/fasta
+        valueFrom: $(self.basename.split(".")[0]).tap.0500.tsv.otu  
+      mothur_shared_out:
+        source: extractFeatures/fasta
+        valueFrom: $(self.basename.split(".")[0]).tap.0500.mothur.otu        
+    out: [uclust , matched_sequences , otus]
 
-  convertToOTU:
-    label:
-    doc: Stage 0600:\ convert .uc to .otu files
-    run: ../Tools/uc2otu.tool.cwl
-    in:
-      input: mapReads/uclust
-      output:
-        source: mapReads/uclust
-        valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
-    out: [otu]
+  # convertToOTU:
+  #   label:
+  #   doc: Stage 0600:\ convert .uc to .otu files
+  #   run: ../Tools/uc2otu.tool.cwl
+  #   in:
+  #     input: mapReads/uclust
+  #     output:
+  #       source: mapReads/uclust
+  #       valueFrom: $(self.basename.split(".")[0]).tap.0600.otu
+  #   out: [otu]
 
 
   # classification:
