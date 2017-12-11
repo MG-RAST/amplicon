@@ -35,3 +35,8 @@ This will be your working directory. Copy or move your sequence files into this 
 
  
 6. ```docker run -v `pwd`:/Data mgrast/tap:latest ```
+
+## Pipeline
+
+![alt text](images/TAP-Workflow-1.0.png "Title")
+![alt text](images/TAP-Workflow-1.0.svg "Title SVG")
