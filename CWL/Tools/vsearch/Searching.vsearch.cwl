@@ -20,6 +20,13 @@ stdout: Searching.log
 stderr: Searching.error
 inputs:
 
+    notrunclabels:
+      type: boolean?
+      doc: "Do not truncate after space or ; "
+      default: False 
+      inputBinding:
+        prefix: --notrunclabels
+
     maxgaps:
       type: int?
       doc: reject if more indels
@@ -423,7 +430,10 @@ outputs:
     type: File
     outputBinding:
       glob: $(inputs.matched)
-
+  otus:
+    type: File[]?
+    outputBinding:
+      glob: [ $(inputs.biomout) , $(inputs.otutabout) , $(inputs.mothur_shared_out)]   
   info:
     type: stdout
   error: 
