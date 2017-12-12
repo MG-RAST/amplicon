@@ -16,15 +16,15 @@ primer:
   forward: CCTAYGGGDBGCWSCAG
   reverse: ATTAGADACCCBNGTAGTCC    
   
-mate_pair:
-  forward:  
-    class: File
-    path: /Data/R1.fastq.gz
-    format: fastq.gz
-  reverse:  
-    class: File
-    path: /Data/R2.fastq.gz
-    format: fastq.gz
+mate_pairs:
+  - forward:  
+      class: File
+      path: /Data/R1.fastq.gz
+      format: fastq.gz
+    reverse:  
+      class: File
+      path: /Data/R2.fastq.gz
+      format: fastq.gz
     
 pipeline_options:
   merging: 
