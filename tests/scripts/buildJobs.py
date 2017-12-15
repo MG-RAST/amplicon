@@ -42,6 +42,7 @@ def main(args):
   parser.add_option( "--outdir",   dest="outdir" , default="./", help="")
   parser.add_option( "--cwldir",  dest="cwldir" ,default="./", help="absolute path to CWL dir")
   parser.add_option( "--datadir",  dest="datadir" ,default="./Data/Inputs/", help="absolute path to data dir")
+  parser.add_option( "--yaml", dest="yaml", action="store_true" , default=False , help="Create yaml job file")
   logger.info("Parsing options")
   (opts, args) = parser.parse_args()
   
@@ -70,18 +71,20 @@ def main(args):
     'reverse': 'ATTAGADACCCBNGTAGTCC'
     }
   
-  mate_pair = {
-    'forward': {
-      'class': 'File',
-      'path':  opts.cwldir + '/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz',
-      'format': 'fastq.gz'
-      },
-    'reverse': {
-      'class': 'File',
-      'path':  opts.cwldir + '/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz',
-      'format': 'fastq.gz'
-      }
-    }
+  mate_pairs = [
+                {
+                'forward': {
+                  'class': 'File',
+                  'path':  opts.cwldir + '/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz',
+                  'format': 'fastq.gz'
+                  },
+                'reverse': {
+                  'class': 'File',
+                  'path':  opts.cwldir + '/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz',
+                  'format': 'fastq.gz'
+                  }
+                }
+              ]
 
   classification = {
     'cutoff' : 60 ,
@@ -142,15 +145,16 @@ def main(args):
         'reference_taxonomy' : reference_taxonomy ,
         'indexDir' : indexDir ,
         'primer' : primer ,
-        'mate_pair' : mate_pair,
+        'mate_pairs' : mate_pairs,
         'pipeline_options': params
         }
   
       fo_json.write( json.dumps(job) )
       fo_json.close
-    
-      # fo_yaml.write( yaml.dump(job) )
-#       fo_yaml.close
+
+      if opts.yaml :
+        fo_yaml.write( yaml.dump(job) )
+        fo_yaml.close
   
 if __name__ == "__main__":
   logger.info("Starting program")
