@@ -183,8 +183,10 @@ def main(args):
       fo_json = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.json" , "w")
       fo_yaml = open(opts.outdir + "/cluster-" + str(percent_identity) + ".classification-" + str(cutoff) + ".job.yaml" , "w")
       
-      params['clustering']['percent_identity'] = str(percent_identity)
-      params['classify']['cutoff'] = str(cutoff)
+      # params['clustering']['percent_identity'] = str(percent_identity)
+      params['clustering']['percent_identity'] = percent_identity
+      # params['classify']['cutoff'] = str(cutoff)
+      params['classify']['cutoff'] = cutoff
   
       params['merging']['fastq_maxdiffs']     = 30
       params['merging']['fastq_minovlen']     = 30
