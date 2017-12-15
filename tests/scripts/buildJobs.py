@@ -98,7 +98,47 @@ def main(args):
   }
   
 
+####
+reference_database:
+  class: File
+  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.fasta
+  format: fasta
 
+reference_taxonomy:
+  class: File
+  path: ../Data/Inputs/DBs/silva_v128NR.341F816R.tax
+  
+indexDir:
+  class: Directory
+  path:  ../Data/Inputs/DBs/PhiX   
+
+primer: 
+  forward: CCTAYGGGDBGCWSCAG
+  reverse: ATTAGADACCCBNGTAGTCC    
+  
+mate_pairs:
+  - forward:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz
+      format: fastq.gz
+    reverse:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz
+      format: fastq.gz
+  - forward:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest2.R1.fastq.gz
+      format: fastq.gz
+    reverse:  
+      class: File
+      path: /amplicon/CWL/Data/Inputs/Prok.forest2.R2.fastq.gz
+      format: fastq.gz    
+    
+   
+
+      
+
+   
 
   # reference_database:
  #    class: File
@@ -139,6 +179,16 @@ def main(args):
       
       params['clustering']['percent_identity'] = str(percent_identity)
       params['classify']['cutoff'] = str(cutoff)
+  
+      params['merging']['fastq_maxdiffs']     = 30
+      params['merging']['fastq_minovlen']     = 30
+      params['merging']['fastq_minmergelen']  = 300
+      params['primer_trimming']['error']      = 0.06
+      params['filter_reads']['max_expected_error'] = 1
+      params['read_mapping']['percent_identity'] = 0.97 
+      params['dereplication'] = {}
+  
+  
   
       job = { 
         'reference_database' : reference_database ,
