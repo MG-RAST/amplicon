@@ -94,8 +94,14 @@ def main(args):
     'merging' : {} ,
     'dereplication': {} ,
     'clustering' : {} ,
-    'classify' : {} 
+    'classify' : {} ,
+    'primer_trimming' : {} ,
+    'filter_reads' : {} ,
+    'read_mapping' : {} ,
+    
+    
   }
+  
   
 
 # ####
