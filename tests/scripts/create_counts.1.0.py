@@ -348,7 +348,7 @@ def main(args):
           for samples in data['noPrimer'] :
            
               # get sample name from file name
-              print(sample)
+              print(samples)
               logger.debug(samples)
               sample_name = samples[1]['basename']
               # count reads in single file
