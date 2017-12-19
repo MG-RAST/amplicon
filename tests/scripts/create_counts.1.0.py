@@ -345,14 +345,14 @@ def main(args):
         summary['noPrimer'] = { 'total' : 0 , 'samples' : [] }
         if len(data[ out_name ]) == 2:
           
-          for samples in data['noPrimer'] :
+          for sample in data['noPrimer'][1] :
            
               # get sample name from file name
-              print(samples)
-              logger.debug(samples)
-              sample_name = samples[1]['basename']
+              print(sample)
+              logger.debug(sample)
+              sample_name = sample['basename']
               # count reads in single file
-              number_of_reads = count_fastq(path_prefix + samples[1]['path'])
+              number_of_reads = count_fastq(path_prefix + sample['path'])
               # add counts
               summary['noPrimer']['total'] = summary['noPrimer']['total'] + number_of_reads
               summary['noPrimer']['samples'].append( { 'sample' : sample_name , 'count' : number_of_reads } )
