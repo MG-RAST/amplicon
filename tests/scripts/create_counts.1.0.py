@@ -343,7 +343,7 @@ def main(args):
       if out_name ==  "noPrimer" and data[out_name] is not None:
         
         summary['noPrimer'] = { 'total' : 0 , 'samples' : [] }
-        if len(data[ out_name ]) > 1:
+        if len(data[ out_name ]) == 2:
           
           for samples in data['noPrimer'] :
            
@@ -358,6 +358,8 @@ def main(args):
           nr_entries = summary['noPrimer']['total']
           counts[dir_name][index]={ stage['label'] : nr_entries}
         else:
+          logger.warning("Missing output from forward and reverse primer removal")
+          sys.exit("Yeah")
           counts[dir_name][index]={ stage['label'] : 0 }
  #        # Count old version too (forward and reverse in one call)
  #        if len(data[ out_name ]) > 0:
