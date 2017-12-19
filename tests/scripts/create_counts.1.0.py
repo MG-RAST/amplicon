@@ -23,7 +23,7 @@ from Bio import SeqIO
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('Main')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 logger.info("Parsing command line")
