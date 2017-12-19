@@ -374,6 +374,11 @@ def main(args):
        for f in data['filtered'] :
            # pprint(f)
            # get sample name from file name
+           
+           if not f :
+             logger.warning("Missing output for filtering")
+             next
+           
            sample_name = f['basename']
            # count reads in single file
            number_of_reads = count_fasta(path_prefix + f['path'])
