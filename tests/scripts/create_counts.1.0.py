@@ -348,6 +348,7 @@ def main(args):
           for samples in data['noPrimer'] :
            
               # get sample name from file name
+              logger.debug(samples)
               sample_name = samples[1]['basename']
               # count reads in single file
               number_of_reads = count_fastq(path_prefix + samples[1]['path'])
