@@ -376,8 +376,8 @@ def main(args):
            # get sample name from file name
            
            if not f :
-             logger.warning("Missing output for filtering")
-             next
+             logger.warning("Missing output for filtering: " + f)
+             break
            
            sample_name = f['basename']
            # count reads in single file
