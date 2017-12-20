@@ -376,7 +376,7 @@ def main(args):
            # get sample name from file name
            
            if not f :
-             logger.warning("Missing output for filtering: " + f)
+             logger.warning("Missing output for filtering" )
              break
            
            sample_name = f['basename']
