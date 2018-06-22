@@ -12,9 +12,6 @@ hints:
     
 requirements:
   InlineJavascriptRequirement: {}
-  SchemaDefRequirement:
-        types:
-          - $import: ../Types/FileFormats.cv.yaml  
  
   
 stdout: |
@@ -57,12 +54,7 @@ outputs:
   error: 
     type: stderr  
   
-# $namespace:
-#   $namespaces:
-#     file: FileFormats
-#
-# $schema:
-#   - ../CV/FileFormats.owl
+
 
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"
