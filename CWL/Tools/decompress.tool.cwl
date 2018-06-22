@@ -12,11 +12,9 @@ hints:
     
 requirements:
   InlineJavascriptRequirement: {}
-  # InitialWorkDirRequirement:
-  #    listing:
-  #      - $(inputs.mate_pair.forward)
-  #      - $(inputs.mate_pair.reverse)
-  
+  SchemaDefRequirement:
+        types:
+          - $import: ../Types/FileFormats.cv.yaml  
  
   
 stdout: |
@@ -35,9 +33,10 @@ stderr: decompress.error
 
 inputs:
   file:
+    doc: gziped file
     type: File
-    format: 
-      - gz
+    # format:
+    #   - file:gz
     inputBinding:
       position: 3  
   output:
@@ -58,6 +57,12 @@ outputs:
   error: 
     type: stderr  
   
+# $namespace:
+#   $namespaces:
+#     file: FileFormats
+#
+# $schema:
+#   - ../CV/FileFormats.owl
 
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"

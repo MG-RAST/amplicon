@@ -14,15 +14,15 @@ inputs:
   euka_sequences:
     # /usr/local/share/db/UNITE*.fasta
     type: File
-    format:
-      - fasta
+    # format:
+    #   - fasta
   euka_forward: string
   euka_reverse: string
   prok_sequences:
     # /usr/local/share/db/SILVA*.fasta 
     type: File
-    format:
-      - fasta
+    # format:
+    #   - fasta
   prok_forward: string
   prok_reverse: string
   error:
@@ -38,8 +38,7 @@ outputs:
     type: File
     outputSource: prok/processed  
  
- 
-  
+
 steps:
   
   euk:  
@@ -48,6 +47,7 @@ steps:
     in:
      sequences: euka_sequences
      format:
+       default: fasta
        source: euka_sequences
        valueFrom: |
          ${

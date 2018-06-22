@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle7</string>
-		<string>181.4.0.297378</string>
+		<string>185.4.0.303032</string>
 	</array>
 	<key>ColorProfiles</key>
 	<array>
@@ -153,12 +153,22 @@
 		<key>NSPaperSize</key>
 		<array>
 			<string>size</string>
-			<string>{792, 612}</string>
+			<string>{792, 611.99999046325684}</string>
 		</array>
 		<key>NSPrintReverseOrientation</key>
 		<array>
 			<string>coded</string>
 			<string>BAtzdHJlYW10eXBlZIHoA4QBQISEhAhOU051bWJlcgCEhAdOU1ZhbHVlAISECE5TT2JqZWN0AIWEASqEhAFxlwCG</string>
+		</array>
+		<key>NSPrinter</key>
+		<array>
+			<string>coded</string>
+			<string>BAtzdHJlYW10eXBlZIHoA4QBQISEhAlOU1ByaW50ZXIAhIQITlNPYmplY3QAhZKEhIQITlNTdHJpbmcBlIQBKxtPZmZpY2VqZXQgUHJvIDg2MDAgWzFBQzRENl2Ghg==</string>
+		</array>
+		<key>NSPrinterName</key>
+		<array>
+			<string>string</string>
+			<string>Officejet Pro 8600 [1AC4D6]</string>
 		</array>
 		<key>NSRightMargin</key>
 		<array>

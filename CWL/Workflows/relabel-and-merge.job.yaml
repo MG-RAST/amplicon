@@ -7,11 +7,11 @@ sequence_files:
   #   path: /Data/Prok_forest2.tap.0102.fastq
   #   format: fasta
   - class: File
-    path: /Data/sample1.test.fasta
-    format: fasta
+    path: ../Data/Inputs/Prok.forest1.fasta  #sample1.test.fasta
+    # format: fasta
   - class: File
-    path: /Data/sample2.test.fasta
-    format: fasta  
+    path: ../Data/Inputs/Prok.forest2.fasta
+    # format: fasta
   
   
     

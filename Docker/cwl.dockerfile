@@ -66,7 +66,8 @@ RUN cd /root \
   && install -m755 ITSx_*/ITSx /usr/local/bin \
   && mv ITSx_*/ITSx_db /usr/local/share/db \
   && ln -s /usr/local/share/db/ITSx_db /usr/local/bin/ITSx_db \
-  && rm -rf ITSx_*.tar.gz ITSx_*
+  && rm -rf ITSx_*.tar.gz ITSx_* \
+  && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
 
 RUN cd /root \
   && wget http://microbiology.se/sw/Metaxa2_2.1.3.tar.gz \

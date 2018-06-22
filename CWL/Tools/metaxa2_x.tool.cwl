@@ -24,8 +24,8 @@ inputs:
   
   input:
     type: File
-    format:
-      - fasta
+    # format:
+    #   - fasta
     doc: DNA FASTA input file to investigate  
     inputBinding:
       prefix: -i
@@ -102,7 +102,7 @@ outputs:
     type: stderr  
   
 
-$namespaces:
-  Formats: FileFormats.cv.yaml
+# $namespaces:
+#   Formats: FileFormats.cv.yaml
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"

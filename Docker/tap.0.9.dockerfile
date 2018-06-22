@@ -32,7 +32,7 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 #    && mkdir -p /usr/local/share/db \
 #    && install -m 644 SILVA*.fasta /usr/local/share/db \
 #    && rm -f SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta*
- 
+
 # # unite for ITS
 # WORKDIR /root
 # RUN cd /root
@@ -42,7 +42,7 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # RUN install -m644 UNITE*dynamic* /usr/local/share/db
 # RUN rm -f UNITE* sh*mothur*.zip
 #    # && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
- 
+
 #
 # # phix DB from Illumina
 # RUN cd /root \
@@ -58,7 +58,7 @@ RUN cd /root \
   && install -m755 SPAdes-*/bin/* /usr/local/bin/ \
   && mv SPAdes-*/share/* /usr/local/share/ \
   && rm -rf SPAdes-*
-  
+
 RUN cd /root \
   && wget http://microbiology.se/sw/ITSx_1.0.11.tar.gz \
   && tar xzf ITSx_*.tar.gz \
@@ -66,7 +66,8 @@ RUN cd /root \
   && install -m755 ITSx_*/ITSx /usr/local/bin \
   && mv ITSx_*/ITSx_db /usr/local/share/db \
   && ln -s /usr/local/share/db/ITSx_db /usr/local/bin/ITSx_db \
-  && rm -rf ITSx_*.tar.gz ITSx_*
+  && rm -rf ITSx_*.tar.gz ITSx_* \
+  && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
 
 RUN cd /root \
   && wget http://microbiology.se/sw/Metaxa2_2.1.3.tar.gz \
@@ -86,12 +87,12 @@ RUN cd /root \
   && tar xf fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2 \
   && install -m755 bin/* /usr/local/bin/  \
   && rm -rf /root/fastx_bin/
-    
+
 
 # install CPAN module Text::Table
 RUN cd /root \
   && yes | perl -MCPAN -e "CPAN::Shell->notest(qw!install Text::Table!)"
-  
+
 
 # vsearch 2.4.4
 RUN cd /root \
@@ -106,7 +107,7 @@ RUN cd /root \
 	&& cd .. \
   && rm -rf /root/vsearch-* /root/v2*.tar.gz
 
-  
+
 # SILVA DB for 16s // requires primer pair specific post-processing
 # full version https://www.arb-silva.de/no_cache/download/archive/current/Exports/SILVA_128_SSURef_tax_silva_trunc.fasta.gz
 # RUN cd /root \
@@ -115,7 +116,7 @@ RUN cd /root \
 #  && mkdir -p /usr/local/share/db \
 #  && install -m 644 SILVA*.fasta /usr/local/share/db \
 #  && rm -f SILVA_128_SSURef_Nr99_tax_silva_trunc.fasta*
- 
+
 # # unite for ITS
 # RUN cd /root \
 #  && wget --no-check-certificate https://unite.ut.ee/sh_files/sh_mothur_release_s_20.11.2016.zip \
@@ -124,16 +125,16 @@ RUN cd /root \
 #  && install -m644 UNITE*dynamic* /usr/local/share/db \
 #  && rm -f UNITE* sh*mothur*.zip \
 #  # && ( for i in /usr/local/share/db/ITSx_db/HMMs/*.hmm ; do hmmpress -f $i ; done )
- 
- 
+
+
 # mothur 1.39.5 
 RUN cd /root \
   && wget https://github.com/mothur/mothur/releases/download/v1.39.5/Mothur.linux_64_static.zip \
   && unzip Mothur.linux_64_static.zip \
   && cp mothur/mothur /usr/local/bin \
   && rm Mothur.linux_64_static.zip 
- 
- 
+
+
 # # phix DB from Illumina
 # RUN cd /root \
 #  && wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz \
@@ -150,12 +151,12 @@ RUN pip install cwlref-runner
 # install contents of bin directory in /usr/local/bin
 COPY bin/* /usr/local/bin/
 RUN chmod 755 /usr/local/bin/*
-  
+
 # add CWL dirs
 ENV JOBDIR /CWL/Jobs
 ENV WORKFLOWDIR /CWL/Workflows
 ENV TOOLDIR /CWL/Tools
- 
+
 COPY CWL/Workflows /CWL/Workflows
 COPY CWL/Workflows/simple-job.template.yaml /CWL/Jobs/tap-default-job.yaml
 COPY CWL/Tools /CWL/Tools

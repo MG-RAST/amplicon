@@ -14,7 +14,7 @@ baseCommand: [vsearch]
 hints:
   DockerRequirement:
     dockerPull: mgrast/amplicon:1.0
-    # dockerPull: mgrast/tools:1.0
+
   
 requirements:
   InlineJavascriptRequirement: {}
@@ -218,7 +218,11 @@ outputs:
   info:
     type: stdout
   error: 
-    type: stderr  
+    type: stderr
+  fasta:
+    type: File?
+    outputBinding:
+      glob: $(inputs.fastaout)
   fastq:
     type: File?
     outputBinding:    

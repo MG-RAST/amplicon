@@ -38,11 +38,18 @@ inputs:
     doc: Base for the names of output file(s)
     inputBinding:
       prefix: -o
+  
+  hmmdir:
+    type: Directory?
+    label: HMM profile directory
+    doc: Path to a directory of HMM-profile collections representing ITS conserved region.
+    inputBinding:
+      prefix: -p 
       
   profile:
-    type: ITSx-profile.yaml#profile[]
+    type: ITSx-profile.yaml#profileITSx[]
     label: Profile set to use for the search
-    default: [all]
+    #default: [all]
     inputBinding:
       itemSeparator: ','
       prefix: -t
@@ -137,6 +144,7 @@ outputs:
   
 
 $namespaces:
-  Formats: FileFormats.cv.yaml
+  Profiles: ITSx-profile.yaml
+  
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"

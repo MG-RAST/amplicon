@@ -71,9 +71,9 @@ stderr: seqUtil.error
 inputs:
   sequences:
     type: File
-    format:
-      - Formats:fastq
-      - Formats:fasta
+    # format:
+    #   - Formats:fastq
+    #   - Formats:fasta
     inputBinding:
       prefix: --input
   fastq2fasta:
@@ -105,7 +105,7 @@ arguments:
   - prefix:
     valueFrom: |
         ${
-           if (  ("format" in inputs.sequences) && (inputs.sequences.format.split("/").slice(-1)[0] == "fastq")  ) { return "--fastq"; } else { return "" ; }  
+           if (  (inputs.sequences.nameext) && (inputs.sequences.nameext == ".fastq")  ) { return "--fastq"; } else { return "" ; }  
          }
     
 
@@ -118,26 +118,26 @@ outputs:
   error: 
     type: stderr  
   file:
-    type: File
-    format: |
-        ${
-          if (inputs.fasta2tab) 
-              { return "tsv" ;}
-          else if (inputs.sortbyid2tab) 
-              { return "tsv" ;}
-          else if (inputs.fastq2fasta) 
-              { return "fasta";}
-          else if (inputs.sequences.format) 
-              { return inputs.sequences.format ;}
-          else { return '' ;}
-          return "" ;
-        }
+    type: File?
+    # format: |
+    #     ${
+    #       if (inputs.fasta2tab)
+    #           { return "tsv" ;}
+    #       else if (inputs.sortbyid2tab)
+    #           { return "tsv" ;}
+    #       else if (inputs.fastq2fasta)
+    #           { return "fasta";}
+    #       else if (inputs.sequences.format)
+    #           { return inputs.sequences.format ;}
+    #       else { return '' ;}
+    #       return "" ;
+    #     }
     outputBinding: 
       glob: $(inputs.output)
     
 
-$namespaces:
-  Formats: FileFormats.cv.yaml
+# $namespaces:
+#   Formats: FileFormats.cv.yaml
 #
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"

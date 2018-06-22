@@ -41,10 +41,13 @@ inputs:
     type: string?                        
     inputBinding:
       prefix: -a
-  format:
+  sequence_format:
     label: format
     doc:  <fasta|fastq|sra-fastq>
-    type: string                        
+    type: 
+      type: enum
+      name: SequenceFileFormat
+      symbols: [fasta,fastq,sra-fastq]                        
     inputBinding:
       prefix: -f    
   error:

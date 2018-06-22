@@ -41,8 +41,8 @@ stderr: bowtie.error
 inputs:
   fastqin:
     type: File
-    format:
-      - fastq
+    # format:
+    #   - fastq
     inputBinding:
       prefix: -U
   unaligned_out:
@@ -68,7 +68,7 @@ arguments:
 outputs:
   unaligned:
     type: File
-    format: fastq
+    # format: fastq
     outputBinding:
       glob: $(inputs.unaligned_out)
   sam:
@@ -77,7 +77,7 @@ outputs:
     type: stderr  
   
 
-$namespaces:
-  Formats: FileFormats.cv.yaml
+# $namespaces:
+#   Formats: FileFormats.cv.yaml
 # s:license: "https://www.apache.org/licenses/LICENSE-2.0"
 # s:copyrightHolder: "MG-RAST"

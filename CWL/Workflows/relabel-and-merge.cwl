@@ -13,7 +13,7 @@ requirements:
 inputs:
   sequence_files:
     type: File[]
-    format: fasta
+    # format: fasta
     
 outputs:
  concatenated:
@@ -65,7 +65,7 @@ steps:
       outputs:
         concatenated: 
           type: File
-          format: fasta
+          # format: fasta
           outputBinding: 
             glob: merged.*.fasta
           # type: stdout

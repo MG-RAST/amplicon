@@ -1,7 +1,7 @@
 cwlVersion: v1.0
 class: Workflow
 
-label: TAP 0.9
+label: TAP Prokaryotic 0.9
 doc:  
 
 requirements:
@@ -63,8 +63,8 @@ inputs:
   reference_database:
     doc: Reference database, e.g. UNITE or SILVA
     type: File
-    format:
-      - fasta
+    # format:
+    #   - fasta
   reference_taxonomy:
     doc: Taxonomy mapping from accession to tax string
     type: File
@@ -360,11 +360,11 @@ steps:
     label: Remove primer (cutadapt)
     doc: Stage 0100:\ target specific primer removal using cutadpt
     run: ../Tools/cutadapt.tool.cwl
-    scatter: [sequences,format,output]
+    scatter: [sequences,sequence_format,output]
     scatterMethod: dotproduct
     in:
      sequences: PHIX/unaligned
-     format:
+     sequence_format:
        source: PHIX/unaligned
        valueFrom: $(self.nameext.split(".").pop())
      g:
@@ -396,11 +396,11 @@ steps:
     label: Remove primer (cutadapt)
     doc: Stage 0100:\ target specific primer removal using cutadpt
     run: ../Tools/cutadapt.tool.cwl
-    scatter: [sequences,format,output]
+    scatter: [sequences,sequence_format,output]
     scatterMethod: dotproduct
     in:
      sequences: removeForwardPrimer/processed
-     format:
+     sequence_format:
        source: removeForwardPrimer/processed
        valueFrom: $(self.nameext.split(".").pop())
      # g:

@@ -4,11 +4,11 @@ euka_sequences:
   class: File
   path: ../Data/Inputs/sequences.all.fasta
   # /usr/local/share/db/UNITE*.fasta
-  format: fasta
+  # format: fasta
 prok_forward: "CCTAYGGGDBGCWSCAG"
 prok_reverse: "ATTAGADACCCBNGTAGTCC"  
 prok_sequences:
   class: File
   path: ../Data/Inputs/sequences.all.fasta
   # /usr/local/share/db/SILVA*.fasta 
-  format: fasta  
+  # format: fasta

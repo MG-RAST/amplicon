@@ -19,19 +19,19 @@ primer:
 mate_pairs:
   - forward:  
       class: File
-      path: /amplicon/CWL/Data/Inputs/Prok.forest1.R1.fastq.gz
+      path: ../Data/Inputs/Prok.forest1.R1.fastq.gz
       format: fastq.gz
     reverse:  
       class: File
-      path: /amplicon/CWL/Data/Inputs/Prok.forest1.R2.fastq.gz
+      path: ../Data/Inputs/Prok.forest1.R2.fastq.gz
       format: fastq.gz
   - forward:  
       class: File
-      path: /amplicon/CWL/Data/Inputs/Prok.forest2.R1.fastq.gz
+      path: ../Data/Inputs/Prok.forest2.R1.fastq.gz
       format: fastq.gz
     reverse:  
       class: File
-      path: /amplicon/CWL/Data/Inputs/Prok.forest2.R2.fastq.gz
+      path: ../Data/Inputs/Prok.forest2.R2.fastq.gz
       format: fastq.gz    
     
    
