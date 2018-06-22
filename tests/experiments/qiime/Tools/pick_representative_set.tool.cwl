@@ -28,7 +28,7 @@ inputs:
     format:
       - fasta
     doc: nucleotide fasta file
-    inputBinding:
+    inputBinding: 
       prefix: -f    
   
     

@@ -1,7 +1,7 @@
 cwlVersion: v1.0
 class: Workflow
 
-label: TAP 0.9
+label: QIIME
 doc:  
 
 requirements:
